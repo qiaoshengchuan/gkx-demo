@@ -1,0 +1,1083 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>抽图任务管理</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login_page': '登录页',
+    'home_dashboard': '首页/仪表盘',
+    'resource_collection_overview': '资源采集总览',
+    'collection_task_management': '采集任务管理',
+    'create_edit_collection_task': '新建/编辑采集任务',
+    'collection_task_monitoring': '采集任务监控',
+    'information_source_management': '信息源管理',
+    'collection_node_management': '采集节点管理',
+    'data_cleaning_management': '数据清洗管理',
+    'data_quality_rule_config': '数据质量规则配置',
+    'auto_cleaning_task_config': '自动清洗任务配置',
+    'crowdsourcing_annotation_management': '群智标注任务管理',
+    'data_quality_cleaning_report': '数据质量/清洗评估报告',
+    'data_management_overview': '数据管理总览',
+    'data_fusion_config': '数据融合配置',
+    'source_db_table_management': '源数据库表管理',
+    'data_lifecycle_management': '数据生命周期管理',
+    'entity_data_management': '实体数据管理',
+    'data_processing_flow_config': '数据处理流程配置',
+    'data_entity_library_management': '数据实体库管理',
+    'api_service_management': 'API服务管理',
+    'data_service_monitoring': '数据服务监控',
+    'rule_discovery_overview': '规则发现总览',
+    'graph_extraction_task_management': '抽图任务管理',
+    'rule_discovery_task_config': '规则发现任务配置',
+    'rule_library_management': '规则库管理',
+    'create_edit_rule': '新建/编辑规则',
+    'rule_application_management': '规则应用任务管理',
+    'rule_application_monitoring': '规则应用监控',
+    'intelligence_mining_dashboard': '情报挖掘仪表盘',
+    'tech_intelligence_overview': '技术情报概览',
+    'development_trend_analysis': '发展态势与趋势分析',
+    'tech_hotspot_analysis': '技术热点分析',
+    'collaboration_analysis': '合作关系分析',
+    'ranking_analysis': '排行分析',
+    'academic_level_analysis': '学术水平分析',
+    'scholar_map': '学者地图',
+    'talent_mobility_analysis': '人才流动分析',
+    'auto_report_generation': '报告自动生成',
+    'scholar_profile_query': '学者画像查询',
+    'network_analysis': '网络分析',
+    'tech_panorama_analysis': '技术全景分析',
+    'expert_recommendation': '专家推荐',
+    'tech_traceability_analysis': '技术溯源分析',
+    'topic_mutation_analysis': '主题突变分析',
+    'dynamic_intelligence_recommendation': '动态情报推荐',
+    'thematic_intelligence_analysis': '专题情报分析',
+    'system_management': '系统管理',
+    'system_config': '系统配置',
+    'system_resource_monitoring': '系统资源监控',
+    'user_management': '用户管理',
+    'role_permission_management': '角色与权限管理',
+    'user_log_management': '用户日志管理',
+    'notification_center': '通知中心',
+    'data_import_export': '数据导入导出'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="简体中文" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽图任务管理</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+/* CSS code for common usage*/
+/* daisyUI Theme Variables Customization
+* Based on the selected daisyUI theme and UI guidance requirements,
+* customize only the CSS variables that need to be different from the theme defaults.
+* Available theme variables for customization:
+*/
+/* Only modify if different from chosen theme defaults */
+:root {
+  /* Customize brand colors for tech intelligence system */
+  --color-primary: rgba(37, 99, 235, 1); /* Deep blue #2563eb */
+  --color-primary-content: rgba(255, 255, 255, 1);
+  --color-secondary: rgba(99, 102, 241, 1); /* Indigo #6366f1 */
+  --color-secondary-content: rgba(255, 255, 255, 1);
+  --color-accent: rgba(147, 197, 253, 1); /* Light blue #93c5fd */
+  --color-accent-content: rgba(37, 99, 235, 1);
+  --color-base-100: rgba(255, 255, 255, 1); /* Pure white for cards */
+  --color-base-200: rgba(249, 250, 251, 1); /* Light gray for sections */
+  --color-base-300: rgba(229, 231, 235, 1);
+  --color-base-content: rgba(31, 41, 55, 1); /* Dark gray for text */
+  --color-success: rgba(34, 197, 94, 1); /* Green #22c55e */
+  --color-warning: rgba(251, 191, 36, 1); /* Amber #fbbf24 */
+  --color-error: rgba(239, 68, 68, 1); /* Red #ef4444 */
+  --color-info: rgba(59, 130, 246, 1); /* Blue #3b82f6 */
+  --radius-box: 0.5rem; /* 8px for Apple-like friendly feel */
+  --radius-field: 0.375rem; /* 6px for form elements */
+}
+
+/* Additional custom styles for common usage */
+.header-height {
+  height: 64px;
+}
+
+.sidebar-width {
+  width: 256px; /* 16rem */
+}
+
+.mega-menu-transition {
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+.breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+/* Sidebar navigation styles */
+.sidebar-nav-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Content area spacing for dashboard layout */
+.main-content-area {
+  margin-left: 256px; /* 16rem - matches sidebar width */
+  min-height: calc(100vh - 64px); /* Full height minus header */
+}
+
+@media (max-width: 1024px) {
+  .main-content-area {
+    margin-left: 0;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-base-300);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base-content);
+  opacity: 0.5;
+}
+</style>
+    <style>
+/* Page-specific styles for Graph Extraction Task Management */
+.table th, .table td {
+    white-space: nowrap;
+}
+
+.card-title {
+    color: var(--color-base-content);
+}
+
+.table thead th {
+    font-weight: 600;
+    color: var(--color-base-content);
+    background-color: var(--color-base-200);
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-base-200 font-sans">
+    
+    <div data-section-id="common_header" data-section-type="common_header" class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 header-height px-4 lg:px-8">
+  <!-- Mobile Menu Button &amp; Logo Section -->
+  <div class="navbar-start">
+    <button data-type="button" onclick="SidebarNavigation.toggleSidebar()" class="btn btn-ghost lg:hidden">
+      <span class="iconify" data-icon="heroicons:bars-3" data-width="24"></span>
+    </button>
+    
+    <button data-type="button" onclick="navigateTo(&#39;home_dashboard&#39;)" class="btn btn-ghost normal-case text-xl font-bold text-primary ml-2 lg:ml-0">
+      <span class="iconify" data-icon="heroicons:chart-bar-square" data-width="32"></span>
+      <span data-type="text">科技指数计算工具库</span>
+    </button>
+  </div>
+
+  <!-- Desktop Navigation - Hidden on mobile, sidebar takes over -->
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1 gap-2">
+      <li>
+        <button data-type="button" data-nav-item="home_dashboard" onclick="navigateTo(&#39;home_dashboard&#39;)" class="btn btn-ghost">
+          <span data-type="text">首页</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="resource_collection_overview" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">资源采集</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="data_management_overview" onclick="navigateTo(&#39;data_management_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">数据管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="rule_discovery_overview" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">规则发现</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="intelligence_mining_dashboard" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="btn btn-ghost">
+          <span data-type="text">情报挖掘</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="navbar-end gap-2">
+    <!-- Search Button -->
+    <button data-type="button" class="btn btn-ghost btn-circle">
+      <span class="iconify" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+    </button>
+    
+    <!-- Notifications -->
+    <div data-type="container" class="dropdown dropdown-end">
+      <button data-type="button" class="btn btn-ghost btn-circle">
+        <div class="indicator">
+          <span class="iconify" data-icon="heroicons:bell" data-width="20"></span>
+          <span class="badge badge-xs badge-primary indicator-item"></span>
+        </div>
+      </button>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80">
+        <li class="menu-title">
+          <span data-type="text">通知中心</span>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)">
+            <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="16"></span>
+            <span data-type="text">数据采集任务完成</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)">
+            <span class="iconify text-warning" data-icon="heroicons:exclamation-triangle" data-width="16"></span>
+            <span data-type="text">系统资源使用率过高</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)" class="btn btn-ghost btn-sm">
+            <span data-type="text">查看全部通知</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- User Menu -->
+    <div data-type="container" class="dropdown dropdown-end">
+      <label tabindex="0" class="btn btn-ghost btn-circle">
+        <div class="avatar placeholder inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-content">
+          <span class="flex items-center justify-center h-full font-semibold text-sm">管</span>
+        </div>
+      </label>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+        <li class="menu-title">
+          <span data-type="text">管理员</span>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;user_management&#39;)">
+            <span class="iconify" data-icon="heroicons:user-circle" data-width="16"></span>
+            <span data-type="text">个人资料</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="16"></span>
+            <span data-type="text">系统设置</span>
+          </button>
+        </li>
+        <li><div class="divider my-1"></div></li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;login_page&#39;)">
+            <span class="iconify" data-icon="heroicons:arrow-right-on-rectangle" data-width="16"></span>
+            <span data-type="text">退出登录</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+[data-section-id="common_header"] .navbar {
+  min-height: 64px;
+}
+
+[data-section-id="common_header"] .dropdown:hover .dropdown-content {
+  display: block;
+}
+
+[data-section-id="common_header"] .avatar.placeholder {
+  transition: all 0.2s ease-in-out;
+}
+
+[data-section-id="common_header"] .avatar.placeholder:hover {
+  transform: scale(1.05);
+}
+</style>
+
+<script>
+(function() {
+  // Initialize header on page load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Close dropdowns when clicking outside
+    document.addEventListener(&#39;click&#39;, function(e) {
+      const dropdowns = document.querySelectorAll(&#39;[data-section-id="common_header"] .dropdown&#39;);
+      dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(e.target)) {
+          const content = dropdown.querySelector(&#39;.dropdown-content&#39;);
+          if (content) {
+            content.classList.remove(&#39;dropdown-open&#39;);
+          }
+        }
+      });
+    });
+  });
+})();
+</script>
+    <div data-section-id="common_sidebar" data-section-type="common_sidebar" class="fixed inset-y-0 left-0 z-40 sidebar-width bg-base-100 border-r border-base-300 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="main-sidebar">
+  <!-- Sidebar Header -->
+  <div class="flex items-center justify-between p-4 border-b border-base-300">
+    <h2 data-type="text" class="text-lg font-semibold text-base-content">功能导航</h2>
+    <button data-type="button" onclick="SidebarNavigation.closeSidebar()" class="btn btn-ghost btn-sm btn-circle lg:hidden">
+      <span class="iconify" data-icon="heroicons:x-mark" data-width="16"></span>
+    </button>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="flex-1 overflow-y-auto sidebar-scroll p-4">
+    <ul class="menu menu-vertical w-full gap-1">
+      <!-- Dashboard -->
+      <li>
+        <button data-type="button" data-sidebar-nav="home_dashboard" onclick="navigateTo(&#39;home_dashboard&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:chart-pie" data-width="20"></span>
+          <span data-type="text">首页仪表盘</span>
+        </button>
+      </li>
+
+      <!-- Resource Collection Section -->
+      <li class="menu-title">
+        <span data-type="text">资源采集</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="resource_collection_overview" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:archive-box" data-width="20"></span>
+          <span data-type="text">资源采集总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="collection-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;collection-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="20"></span>
+            <span data-type="text">采集任务管理</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="collection-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="collection_task_management" onclick="navigateTo(&#39;collection_task_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:list-bullet" data-width="16"></span>
+              <span data-type="text">任务列表</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="create_edit_collection_task" onclick="navigateTo(&#39;create_edit_collection_task&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:plus-circle" data-width="16"></span>
+              <span data-type="text">新建任务</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="collection_task_monitoring" onclick="navigateTo(&#39;collection_task_monitoring&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:chart-bar" data-width="16"></span>
+              <span data-type="text">监控状态</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="information_source_management" onclick="navigateTo(&#39;information_source_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:server" data-width="20"></span>
+          <span data-type="text">信息源管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="collection_node_management" onclick="navigateTo(&#39;collection_node_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:cpu-chip" data-width="20"></span>
+          <span data-type="text">采集节点管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="cleaning-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;cleaning-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:sparkles" data-width="20"></span>
+            <span data-type="text">数据清洗</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="cleaning-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="data_cleaning_management" onclick="navigateTo(&#39;data_cleaning_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:adjustments-horizontal" data-width="16"></span>
+              <span data-type="text">清洗管理</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="data_quality_rule_config" onclick="navigateTo(&#39;data_quality_rule_config&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:shield-check" data-width="16"></span>
+              <span data-type="text">质量规则配置</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Data Management Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">数据管理</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="data_management_overview" onclick="navigateTo(&#39;data_management_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:circle-stack" data-width="20"></span>
+          <span data-type="text">数据管理总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="entity_data_management" onclick="navigateTo(&#39;entity_data_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:squares-2x2" data-width="20"></span>
+          <span data-type="text">实体数据管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="api_service_management" onclick="navigateTo(&#39;api_service_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:code-bracket" data-width="20"></span>
+          <span data-type="text">API服务管理</span>
+        </button>
+      </li>
+
+      <!-- Rule Discovery Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">规则发现</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="rule_discovery_overview" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:light-bulb" data-width="20"></span>
+          <span data-type="text">规则发现总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="rule_library_management" onclick="navigateTo(&#39;rule_library_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:book-open" data-width="20"></span>
+          <span data-type="text">规则库管理</span>
+        </button>
+      </li>
+
+      <!-- Intelligence Mining Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">情报挖掘</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="intelligence_mining_dashboard" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:chart-bar-square" data-width="20"></span>
+          <span data-type="text">情报挖掘仪表盘</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="analysis-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;analysis-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:magnifying-glass-circle" data-width="20"></span>
+            <span data-type="text">分析工具</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="analysis-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="tech_intelligence_overview" onclick="navigateTo(&#39;tech_intelligence_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+              <span data-type="text">技术情报概览</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="scholar_profile_query" onclick="navigateTo(&#39;scholar_profile_query&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:user-group" data-width="16"></span>
+              <span data-type="text">学者画像查询</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="network_analysis" onclick="navigateTo(&#39;network_analysis&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:share" data-width="16"></span>
+              <span data-type="text">网络分析</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      <!-- System Management Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">系统管理</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="system_management" onclick="navigateTo(&#39;system_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:cog-8-tooth" data-width="20"></span>
+          <span data-type="text">系统管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="user_management" onclick="navigateTo(&#39;user_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:users" data-width="20"></span>
+          <span data-type="text">用户管理</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-base-content/50 z-30 lg:hidden hidden" onclick="SidebarNavigation.closeSidebar()"></div>
+
+<style>
+[data-section-id="common_sidebar"] {
+  top: 64px; /* Start below header */
+  height: calc(100vh - 64px); /* Full height minus header */
+}
+
+[data-section-id="common_sidebar"] .sidebar-nav-item {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 400;
+}
+
+[data-section-id="common_sidebar"] .menu-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-base-content);
+  opacity: 0.6;
+  margin: 1rem 0 0.5rem 0;
+  padding: 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-section-id="common_sidebar"] .submenu-arrow {
+  transition: transform 0.2s ease-in-out;
+}
+
+@media (max-width: 1024px) {
+  [data-section-id="common_sidebar"] {
+    top: 0;
+    height: 100vh;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Initialize sidebar functionality
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Handle escape key to close sidebar on mobile
+    document.addEventListener(&#39;keydown&#39;, function(e) {
+      if (e.key === &#39;Escape&#39;) {
+        SidebarNavigation.closeSidebar();
+      }
+    });
+    
+    // Handle window resize
+    window.addEventListener(&#39;resize&#39;, function() {
+      if (window.innerWidth >= 1024) {
+        // Desktop: ensure sidebar is visible and overlay is hidden
+        const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+        const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+        
+        if (sidebar) sidebar.classList.remove(&#39;-translate-x-full&#39;);
+        if (overlay) overlay.classList.add(&#39;hidden&#39;);
+      }
+    });
+  });
+})();
+</script>
+
+    <main class="main-content-area">
+        <div data-section-id="common_breadcrumb" data-section-type="common_section" class="bg-base-200 py-4 px-4 lg:px-8">
+  <div data-type="container" class="max-w-full ml-0 lg:ml-64">
+    <div class="text-sm breadcrumbs">
+      <ul>
+        <li class="breadcrumb-separator">
+          <a data-type="text" href="#" onclick="navigateTo(&#39;home_dashboard&#39;)" class="flex items-center gap-1 text-primary hover:text-primary/80">
+            <span class="iconify" data-icon="heroicons:home-solid" data-width="16"></span>
+            <span>首页</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+[data-section-id="common_breadcrumb"] .breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+[data-section-id="common_breadcrumb"] .breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+[data-section-id="common_breadcrumb"] a {
+  transition: color 0.2s ease-in-out;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 1024px) {
+  [data-section-id="common_breadcrumb"] .max-w-full {
+    margin-left: 0;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Breadcrumb component is managed through the global BreadcrumbNavigation object
+  // Usage example:
+  // BreadcrumbNavigation.updateBreadcrumb([
+  //   { name: &#39;首页&#39;, pageId: &#39;home_dashboard&#39; },
+  //   { name: &#39;资源采集&#39;, pageId: &#39;resource_collection_overview&#39; },
+  //   { name: &#39;采集任务管理&#39;, pageId: &#39;collection_task_management&#39; }
+  // ]);
+})();
+</script>
+
+        <section id="GraphExtractionTaskManagementOverview" class="p-4 sm:p-6 lg:p-8">
+            <div data-type="container" class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
+                <h1 data-type="text" class="text-3xl font-bold text-base-content">抽图任务管理</h1>
+                <button data-type="button" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="btn btn-ghost gap-2 self-start sm:self-center">
+                    <span class="iconify" data-icon="heroicons:arrow-left" data-width="20"></span>
+                    <span data-type="text">返回规则发现总览</span>
+                </button>
+            </div>
+
+            <div data-type="container" class="card bg-base-100 shadow-sm rounded-lg mb-8">
+                <div class="card-body p-6">
+                    <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+                        <div data-type="container" class="flex flex-wrap items-center gap-4">
+                            <div class="join">
+                                <input data-type="input" type="text" placeholder="搜索任务名称..." class="input input-bordered join-item w-48">
+                                <button data-type="button" class="btn btn-ghost join-item">
+                                    <span class="iconify" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+                                </button>
+                            </div>
+                            <select data-type="select" class="select select-bordered w-full max-w-xs">
+                                <option disabled="" selected="">所有状态</option>
+                                <option>运行中</option>
+                                <option>已完成</option>
+                                <option>失败</option>
+                            </select>
+                            <div data-type="container" class="flex items-center gap-2">
+                                <input data-type="input" type="date" class="input input-bordered w-40" value="2025-09-01">
+                                <span class="text-base-content/70">-</span>
+                                <input data-type="input" type="date" class="input input-bordered w-40" value="2025-09-25">
+                            </div>
+                        </div>
+                        <div data-type="container" class="flex items-center gap-4 self-end lg:self-center">
+                            <div class="dropdown dropdown-end">
+                                <button data-type="button" tabindex="0" role="button" class="btn btn-outline">
+                                    <span data-type="text">批量操作</span>
+                                    <span class="iconify" data-icon="heroicons:chevron-down" data-width="16"></span>
+                                </button>
+                                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 z-10 mt-2">
+                                    <li><a><span class="iconify" data-icon="heroicons:play" data-width="16"></span>批量启动</a></li>
+                                    <li><a><span class="iconify" data-icon="heroicons:pause" data-width="16"></span>批量暂停</a></li>
+                                    <li><a class="text-error"><span class="iconify" data-icon="heroicons:trash" data-width="16"></span>批量删除</a></li>
+                                </ul>
+                            </div>
+                            <button data-type="button" class="btn btn-primary" onclick="navigateTo(&#39;create_graph_extraction_task&#39;)">
+                                <span class="iconify" data-icon="heroicons:plus-circle" data-width="20"></span>
+                                <span data-type="text">新建任务</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div data-type="container" class="card bg-base-100 shadow-sm rounded-lg mb-8">
+                <div class="card-body p-6">
+                    <h2 data-type="text" class="card-title text-lg font-semibold mb-4">最新图谱抽取趋势</h2>
+                    <div class="bg-base-200 rounded-lg flex items-center justify-center h-80">
+                        <img alt="A line chart showing graph extraction trends over time, displaying entities extracted per day." class="w-full h-full object-cover rounded-lg" data-src="placehold.co/1200x320.png?text=Graph+Extraction+Trend+Chart">
+                    </div>
+                </div>
+            </div>
+
+            <div data-type="container" class="card bg-base-100 shadow-sm rounded-lg">
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra-zebra">
+                        <thead>
+                            <tr>
+                                <th class="w-12"><label><input type="checkbox" class="checkbox"></label></th>
+                                <th>任务ID</th>
+                                <th>任务名称</th>
+                                <th>所属模型</th>
+                                <th>创建时间</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-repeatable="true">
+                                <td><label><input type="checkbox" class="checkbox"></label></td>
+                                <td><span class="font-mono text-xs">T001</span></td>
+                                <td><span class="font-semibold">科技文献实体抽取</span></td>
+                                <td>BERT-CRF-Sci</td>
+                                <td>2025-09-24 10:30</td>
+                                <td><span class="badge badge-success badge-outline">运行中</span></td>
+                                <td class="flex items-center gap-1">
+                                    <button onclick="navigateTo(&#39;edit_graph_extraction_task&#39;)" class="btn btn-ghost btn-xs" aria-label="编辑"><span class="iconify" data-icon="heroicons:pencil-square" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs" aria-label="暂停"><span class="iconify" data-icon="heroicons:pause-circle" data-width="16"></span></button>
+                                    <button onclick="navigateTo(&#39;view_task_logs&#39;)" class="btn btn-ghost btn-xs" aria-label="查看日志"><span class="iconify" data-icon="heroicons:document-text" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs text-error" aria-label="删除"><span class="iconify" data-icon="heroicons:trash" data-width="16"></span></button>
+                                </td>
+                            </tr>
+                            <tr data-repeatable="true">
+                                <td><label><input type="checkbox" class="checkbox"></label></td>
+                                <td><span class="font-mono text-xs">T002</span></td>
+                                <td><span class="font-semibold">专利关系图谱构建</span></td>
+                                <td>GCN-PatentNet</td>
+                                <td>2025-09-23 15:00</td>
+                                <td><span class="badge badge-info badge-outline">已完成</span></td>
+                                <td class="flex items-center gap-1">
+                                    <button onclick="navigateTo(&#39;edit_graph_extraction_task&#39;)" class="btn btn-ghost btn-xs" aria-label="编辑"><span class="iconify" data-icon="heroicons:pencil-square" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs" aria-label="启动"><span class="iconify" data-icon="heroicons:play-circle" data-width="16"></span></button>
+                                    <button onclick="navigateTo(&#39;view_task_logs&#39;)" class="btn btn-ghost btn-xs" aria-label="查看日志"><span class="iconify" data-icon="heroicons:document-text" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs text-error" aria-label="删除"><span class="iconify" data-icon="heroicons:trash" data-width="16"></span></button>
+                                </td>
+                            </tr>
+                            <tr data-repeatable="true">
+                                <td><label><input type="checkbox" class="checkbox"></label></td>
+                                <td><span class="font-mono text-xs">T003</span></td>
+                                <td><span class="font-semibold">学者合作网络分析</span></td>
+                                <td>Custom-GraphSAGE</td>
+                                <td>2025-09-22 09:15</td>
+                                <td><span class="badge badge-error badge-outline">失败</span></td>
+                                <td class="flex items-center gap-1">
+                                    <button onclick="navigateTo(&#39;edit_graph_extraction_task&#39;)" class="btn btn-ghost btn-xs" aria-label="编辑"><span class="iconify" data-icon="heroicons:pencil-square" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs" aria-label="启动"><span class="iconify" data-icon="heroicons:play-circle" data-width="16"></span></button>
+                                    <button onclick="navigateTo(&#39;view_task_logs&#39;)" class="btn btn-ghost btn-xs" aria-label="查看日志"><span class="iconify" data-icon="heroicons:document-text" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs text-error" aria-label="删除"><span class="iconify" data-icon="heroicons:trash" data-width="16"></span></button>
+                                </td>
+                            </tr>
+                             <tr data-repeatable="true">
+                                <td><label><input type="checkbox" class="checkbox"></label></td>
+                                <td><span class="font-mono text-xs">T004</span></td>
+                                <td><span class="font-semibold">新闻事件演化图谱</span></td>
+                                <td>Transformer-EventX</td>
+                                <td>2025-09-21 18:45</td>
+                                <td><span class="badge badge-warning badge-outline">已暂停</span></td>
+                                <td class="flex items-center gap-1">
+                                    <button onclick="navigateTo(&#39;edit_graph_extraction_task&#39;)" class="btn btn-ghost btn-xs" aria-label="编辑"><span class="iconify" data-icon="heroicons:pencil-square" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs" aria-label="启动"><span class="iconify" data-icon="heroicons:play-circle" data-width="16"></span></button>
+                                    <button onclick="navigateTo(&#39;view_task_logs&#39;)" class="btn btn-ghost btn-xs" aria-label="查看日志"><span class="iconify" data-icon="heroicons:document-text" data-width="16"></span></button>
+                                    <button class="btn btn-ghost btn-xs text-error" aria-label="删除"><span class="iconify" data-icon="heroicons:trash" data-width="16"></span></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div data-type="container" class="flex justify-center p-4">
+                    <div class="join">
+                        <button class="join-item btn">«</button>
+                        <button class="join-item btn btn-active">1</button>
+                        <button class="join-item btn">2</button>
+                        <button class="join-item btn">3</button>
+                        <button class="join-item btn btn-disabled">...</button>
+                        <button class="join-item btn">99</button>
+                        <button class="join-item btn">»</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    
+
+    <script>
+/* JavaScript code for common usage, should be wrapped in a closure */
+(function() {
+  // Initialize global namespace
+  window.APP_GLOBALS = window.APP_GLOBALS || {};
+
+  // Navigation function for page transitions
+  window.navigateTo = function(targetPageId) {
+    const isInIframe = window.self !== window.top;
+    const targetFileName = `${targetPageId}.html`;
+    
+    if (isInIframe) {
+      window.parent.postMessage({
+        type: &#39;iframeNavigation&#39;,
+        targetPageId: targetPageId
+      }, &#39;*&#39;);
+    } else {
+      window.location.href = targetFileName;
+    }
+  };
+
+  // Header navigation state management
+  window.HeaderNavigation = {
+    setActiveNavItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-nav-item]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-nav-item&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleMobileMenu: function() {
+      const mobileMenu = document.getElementById(&#39;mobile-nav-menu&#39;);
+      const hamburger = document.getElementById(&#39;hamburger-icon&#39;);
+      const closeIcon = document.getElementById(&#39;close-icon&#39;);
+      
+      if (mobileMenu.classList.contains(&#39;hidden&#39;)) {
+        mobileMenu.classList.remove(&#39;hidden&#39;);
+        hamburger.classList.add(&#39;hidden&#39;);
+        closeIcon.classList.remove(&#39;hidden&#39;);
+      } else {
+        mobileMenu.classList.add(&#39;hidden&#39;);
+        hamburger.classList.remove(&#39;hidden&#39;);
+        closeIcon.classList.add(&#39;hidden&#39;);
+      }
+    }
+  };
+
+  // Sidebar navigation management
+  window.SidebarNavigation = {
+    setActiveMenuItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-sidebar-nav]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-sidebar-nav&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        const isHidden = sidebar.classList.contains(&#39;-translate-x-full&#39;);
+        
+        if (isHidden) {
+          sidebar.classList.remove(&#39;-translate-x-full&#39;);
+          overlay.classList.remove(&#39;hidden&#39;);
+        } else {
+          sidebar.classList.add(&#39;-translate-x-full&#39;);
+          overlay.classList.add(&#39;hidden&#39;);
+        }
+      }
+    },
+
+    closeSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        sidebar.classList.add(&#39;-translate-x-full&#39;);
+        overlay.classList.add(&#39;hidden&#39;);
+      }
+    },
+
+    toggleSubmenu: function(submenuId) {
+      const submenu = document.getElementById(submenuId);
+      const arrow = document.querySelector(`[data-submenu-trigger="${submenuId}"] .submenu-arrow`);
+      
+      if (submenu) {
+        const isHidden = submenu.classList.contains(&#39;hidden&#39;);
+        
+        if (isHidden) {
+          submenu.classList.remove(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(90deg)&#39;;
+        } else {
+          submenu.classList.add(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(0deg)&#39;;
+        }
+      }
+    }
+  };
+
+  // Breadcrumb navigation management
+  window.BreadcrumbNavigation = {
+    updateBreadcrumb: function(breadcrumbData) {
+      const breadcrumbContainer = document.querySelector(&#39;[data-section-id="common_breadcrumb"] .breadcrumbs ul&#39;);
+      if (!breadcrumbContainer) return;
+
+      breadcrumbContainer.innerHTML = &#39;&#39;;
+      breadcrumbData.forEach((item, index) => {
+        const li = document.createElement(&#39;li&#39;);
+        li.className = &#39;breadcrumb-separator&#39;;
+        
+        if (index === breadcrumbData.length - 1) {
+          // Last item (current page) - not clickable
+          li.innerHTML = `<span data-type="text" class="text-base-content/70">${item.name}</span>`;
+        } else {
+          // Clickable items
+          li.innerHTML = `<a data-type="text" href="#" onclick="navigateTo(&#39;${item.pageId}&#39;)" class="text-primary hover:text-primary/80">${item.name}</a>`;
+        }
+        breadcrumbContainer.appendChild(li);
+      });
+    }
+  };
+
+  // Theme management
+  window.ThemeManager = {
+    setTheme: function(themeName) {
+      document.documentElement.setAttribute(&#39;data-theme&#39;, themeName);
+      localStorage.setItem(&#39;app-theme&#39;, themeName);
+    },
+
+    getTheme: function() {
+      return localStorage.getItem(&#39;app-theme&#39;) || &#39;light&#39;;
+    },
+
+    initTheme: function() {
+      const savedTheme = this.getTheme();
+      this.setTheme(savedTheme);
+    }
+  };
+
+  // Initialize theme on load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    window.ThemeManager.initTheme();
+  });
+
+})();
+</script>
+    <script>
+document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Set the active navigation item in the sidebar
+    if (window.SidebarNavigation) {
+        window.SidebarNavigation.setActiveMenuItem(&#39;graph_extraction_task_management&#39;);
+    }
+
+    // Update breadcrumb navigation
+    if (window.BreadcrumbNavigation) {
+        window.BreadcrumbNavigation.updateBreadcrumb([
+            { name: &#39;规则发现&#39;, pageId: &#39;rule_discovery_overview&#39; },
+            { name: &#39;抽图任务管理&#39;, pageId: &#39;graph_extraction_task_management&#39; }
+        ]);
+    }
+});
+</script>
+
+<script>
+    setTimeout(() => {
+      Holder.run({
+        domain: "placehold.co"
+      })
+    }, 100)
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

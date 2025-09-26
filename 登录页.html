@@ -1,0 +1,557 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>登录页</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login_page': '登录页',
+    'home_dashboard': '首页/仪表盘',
+    'resource_collection_overview': '资源采集总览',
+    'collection_task_management': '采集任务管理',
+    'create_edit_collection_task': '新建/编辑采集任务',
+    'collection_task_monitoring': '采集任务监控',
+    'information_source_management': '信息源管理',
+    'collection_node_management': '采集节点管理',
+    'data_cleaning_management': '数据清洗管理',
+    'data_quality_rule_config': '数据质量规则配置',
+    'auto_cleaning_task_config': '自动清洗任务配置',
+    'crowdsourcing_annotation_management': '群智标注任务管理',
+    'data_quality_cleaning_report': '数据质量/清洗评估报告',
+    'data_management_overview': '数据管理总览',
+    'data_fusion_config': '数据融合配置',
+    'source_db_table_management': '源数据库表管理',
+    'data_lifecycle_management': '数据生命周期管理',
+    'entity_data_management': '实体数据管理',
+    'data_processing_flow_config': '数据处理流程配置',
+    'data_entity_library_management': '数据实体库管理',
+    'api_service_management': 'API服务管理',
+    'data_service_monitoring': '数据服务监控',
+    'rule_discovery_overview': '规则发现总览',
+    'graph_extraction_task_management': '抽图任务管理',
+    'rule_discovery_task_config': '规则发现任务配置',
+    'rule_library_management': '规则库管理',
+    'create_edit_rule': '新建/编辑规则',
+    'rule_application_management': '规则应用任务管理',
+    'rule_application_monitoring': '规则应用监控',
+    'intelligence_mining_dashboard': '情报挖掘仪表盘',
+    'tech_intelligence_overview': '技术情报概览',
+    'development_trend_analysis': '发展态势与趋势分析',
+    'tech_hotspot_analysis': '技术热点分析',
+    'collaboration_analysis': '合作关系分析',
+    'ranking_analysis': '排行分析',
+    'academic_level_analysis': '学术水平分析',
+    'scholar_map': '学者地图',
+    'talent_mobility_analysis': '人才流动分析',
+    'auto_report_generation': '报告自动生成',
+    'scholar_profile_query': '学者画像查询',
+    'network_analysis': '网络分析',
+    'tech_panorama_analysis': '技术全景分析',
+    'expert_recommendation': '专家推荐',
+    'tech_traceability_analysis': '技术溯源分析',
+    'topic_mutation_analysis': '主题突变分析',
+    'dynamic_intelligence_recommendation': '动态情报推荐',
+    'thematic_intelligence_analysis': '专题情报分析',
+    'system_management': '系统管理',
+    'system_config': '系统配置',
+    'system_resource_monitoring': '系统资源监控',
+    'user_management': '用户管理',
+    'role_permission_management': '角色与权限管理',
+    'user_log_management': '用户日志管理',
+    'notification_center': '通知中心',
+    'data_import_export': '数据导入导出'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="简体中文" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录页</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+/* CSS code for common usage*/
+/* daisyUI Theme Variables Customization
+* Based on the selected daisyUI theme and UI guidance requirements,
+* customize only the CSS variables that need to be different from the theme defaults.
+* Available theme variables for customization:
+*/
+/* Only modify if different from chosen theme defaults */
+:root {
+  /* Customize brand colors for tech intelligence system */
+  --color-primary: rgba(37, 99, 235, 1); /* Deep blue #2563eb */
+  --color-primary-content: rgba(255, 255, 255, 1);
+  --color-secondary: rgba(99, 102, 241, 1); /* Indigo #6366f1 */
+  --color-secondary-content: rgba(255, 255, 255, 1);
+  --color-accent: rgba(147, 197, 253, 1); /* Light blue #93c5fd */
+  --color-accent-content: rgba(37, 99, 235, 1);
+  --color-base-100: rgba(255, 255, 255, 1); /* Pure white for cards */
+  --color-base-200: rgba(249, 250, 251, 1); /* Light gray for sections */
+  --color-base-300: rgba(229, 231, 235, 1);
+  --color-base-content: rgba(31, 41, 55, 1); /* Dark gray for text */
+  --color-success: rgba(34, 197, 94, 1); /* Green #22c55e */
+  --color-warning: rgba(251, 191, 36, 1); /* Amber #fbbf24 */
+  --color-error: rgba(239, 68, 68, 1); /* Red #ef4444 */
+  --color-info: rgba(59, 130, 246, 1); /* Blue #3b82f6 */
+  --radius-box: 0.5rem; /* 8px for Apple-like friendly feel */
+  --radius-field: 0.375rem; /* 6px for form elements */
+}
+
+/* Additional custom styles for common usage */
+.header-height {
+  height: 64px;
+}
+
+.sidebar-width {
+  width: 256px; /* 16rem */
+}
+
+.mega-menu-transition {
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+.breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+/* Sidebar navigation styles */
+.sidebar-nav-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Content area spacing for dashboard layout */
+.main-content-area {
+  margin-left: 256px; /* 16rem - matches sidebar width */
+  min-height: calc(100vh - 64px); /* Full height minus header */
+}
+
+@media (max-width: 1024px) {
+  .main-content-area {
+    margin-left: 0;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-base-300);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base-content);
+  opacity: 0.5;
+}
+</style> <style>
+    body {
+        background-image: radial-gradient(circle at top left, rgba(243, 244, 246, 1) 0%, rgba(229, 231, 235, 1) 100%);
+    }
+
+    .card {
+        transition: box-shadow 0.3s ease-in-out;
+    }
+
+    .card:hover {
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    }
+    
+    .input:focus {
+        --tw-ring-color: var(--color-primary);
+        --tw-ring-opacity: 0.2;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--tw-ring-color) calc(100% * var(--tw-ring-opacity)), transparent);
+        border-color: var(--color-primary);
+    }
+
+    .checkbox-primary:focus {
+        --tw-ring-color: var(--color-primary);
+        --tw-ring-opacity: 0.2;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--tw-ring-color) calc(100% * var(--tw-ring-opacity)), transparent);
+    }
+
+    #captcha-display {
+        font-family: &#39;Courier New&#39;, Courier, monospace;
+    }
+</style>
+  <script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+  <body class="min-h-screen flex items-center justify-center bg-base-200 font-sans p-4 sm:p-6 lg:p-8">
+    <div class="w-full max-w-7xl mx-auto flex flex-col items-center justify-center gap-16">
+      <!-- Section: Login Header -->
+      <section id="login_header" class="text-center">
+        <div class="flex flex-col items-center gap-4">
+          <a href="#" class="cursor-pointer" onclick="navigateTo(&#39;home_dashboard&#39;); return false;"><img alt="科技指数计算工具库Logo" class="w-20 h-20" data-src="placehold.co/80x80.png?text=Logo"></a>
+          <h1 class="text-3xl font-bold text-base-content tracking-wide">
+            科技指数计算工具库
+          </h1>
+        </div>
+      </section>
+      <!-- Section: Login Form -->
+      <section id="login_form" class="w-full max-w-md">
+        <div class="card bg-base-100 shadow-lg rounded-box">
+          <div class="card-body p-8">
+            <h2 class="card-title text-2xl font-semibold text-center mb-6">
+              登录到您的账户
+            </h2>
+            <form class="space-y-4">
+              <div class="form-control">
+                <label class="label"><span class="label-text">用户名</span></label><input type="text" placeholder="请输入您的用户名" class="input input-bordered w-full">
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">密码</span></label><input type="password" placeholder="请输入您的密码" class="input input-bordered w-full">
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">动态验证码</span></label>
+                <div class="flex items-center gap-2">
+                  <input type="text" placeholder="请输入验证码" class="input input-bordered w-full">
+                  <div id="captcha-display" class="w-32 h-10 select-none flex items-center justify-center bg-base-300 text-base-content font-bold text-xl tracking-widest rounded-field">
+                    <!-- Captcha code will be injected here -->
+                  </div>
+                  <button type="button" aria-label="刷新验证码" class="btn btn-ghost btn-square" onclick="refreshCaptcha()">
+                    <span class="iconify text-base-content/70" data-icon="heroicons:arrow-path" data-width="24"></span>
+                  </button>
+                </div>
+              </div>
+              <div class="flex justify-between items-center text-sm">
+                <label class="label cursor-pointer gap-2"><input type="checkbox" class="checkbox checkbox-primary"><span class="label-text">记住密码</span></label><a href="#" class="link link-hover text-primary" onclick="navigateTo(&#39;login_page&#39;); return false;">忘记密码？</a>
+              </div>
+              <div class="form-control pt-4">
+                <button type="button" class="btn btn-primary w-full" onclick="navigateTo(&#39;home_dashboard&#39;)">
+                  登录
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+      <!-- Section: Feature Showcase -->
+      <section id="feature_showcase" class="w-full max-w-4xl">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div class="flex flex-col items-center p-4">
+            <span class="iconify text-primary" data-icon="heroicons:shield-check-solid" data-width="40"></span>
+            <h3 class="text-lg font-semibold mt-4 mb-2">安全接入</h3>
+            <p class="text-base-content/70 text-sm leading-relaxed">
+              多重安全防护，保障您的数据安全，让您安心使用系统。
+            </p>
+          </div>
+          <div class="flex flex-col items-center p-4">
+            <span class="iconify text-primary" data-icon="heroicons:chart-bar-square-solid" data-width="40"></span>
+            <h3 class="text-lg font-semibold mt-4 mb-2">智能分析</h3>
+            <p class="text-base-content/70 text-sm leading-relaxed">
+              强大的智能分析引擎，为您提供精准的数据洞察和决策支持。
+            </p>
+          </div>
+          <div class="flex flex-col items-center p-4">
+            <span class="iconify text-primary" data-icon="heroicons:bolt-solid" data-width="40"></span>
+            <h3 class="text-lg font-semibold mt-4 mb-2">高效工作</h3>
+            <p class="text-base-content/70 text-sm leading-relaxed">
+              简洁流畅的操作体验，帮助您轻松管理任务，提升工作效率。
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script>
+/* JavaScript code for common usage, should be wrapped in a closure */
+(function() {
+  // Initialize global namespace
+  window.APP_GLOBALS = window.APP_GLOBALS || {};
+
+  // Navigation function for page transitions
+  window.navigateTo = function(targetPageId) {
+    const isInIframe = window.self !== window.top;
+    const targetFileName = `${targetPageId}.html`;
+    
+    if (isInIframe) {
+      window.parent.postMessage({
+        type: &#39;iframeNavigation&#39;,
+        targetPageId: targetPageId
+      }, &#39;*&#39;);
+    } else {
+      window.location.href = targetFileName;
+    }
+  };
+
+  // Header navigation state management
+  window.HeaderNavigation = {
+    setActiveNavItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-nav-item]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-nav-item&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleMobileMenu: function() {
+      const mobileMenu = document.getElementById(&#39;mobile-nav-menu&#39;);
+      const hamburger = document.getElementById(&#39;hamburger-icon&#39;);
+      const closeIcon = document.getElementById(&#39;close-icon&#39;);
+      
+      if (mobileMenu.classList.contains(&#39;hidden&#39;)) {
+        mobileMenu.classList.remove(&#39;hidden&#39;);
+        hamburger.classList.add(&#39;hidden&#39;);
+        closeIcon.classList.remove(&#39;hidden&#39;);
+      } else {
+        mobileMenu.classList.add(&#39;hidden&#39;);
+        hamburger.classList.remove(&#39;hidden&#39;);
+        closeIcon.classList.add(&#39;hidden&#39;);
+      }
+    }
+  };
+
+  // Sidebar navigation management
+  window.SidebarNavigation = {
+    setActiveMenuItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-sidebar-nav]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-sidebar-nav&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        const isHidden = sidebar.classList.contains(&#39;-translate-x-full&#39;);
+        
+        if (isHidden) {
+          sidebar.classList.remove(&#39;-translate-x-full&#39;);
+          overlay.classList.remove(&#39;hidden&#39;);
+        } else {
+          sidebar.classList.add(&#39;-translate-x-full&#39;);
+          overlay.classList.add(&#39;hidden&#39;);
+        }
+      }
+    },
+
+    closeSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        sidebar.classList.add(&#39;-translate-x-full&#39;);
+        overlay.classList.add(&#39;hidden&#39;);
+      }
+    },
+
+    toggleSubmenu: function(submenuId) {
+      const submenu = document.getElementById(submenuId);
+      const arrow = document.querySelector(`[data-submenu-trigger="${submenuId}"] .submenu-arrow`);
+      
+      if (submenu) {
+        const isHidden = submenu.classList.contains(&#39;hidden&#39;);
+        
+        if (isHidden) {
+          submenu.classList.remove(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(90deg)&#39;;
+        } else {
+          submenu.classList.add(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(0deg)&#39;;
+        }
+      }
+    }
+  };
+
+  // Breadcrumb navigation management
+  window.BreadcrumbNavigation = {
+    updateBreadcrumb: function(breadcrumbData) {
+      const breadcrumbContainer = document.querySelector(&#39;[data-section-id="common_breadcrumb"] .breadcrumbs ul&#39;);
+      if (!breadcrumbContainer) return;
+
+      breadcrumbContainer.innerHTML = &#39;&#39;;
+      breadcrumbData.forEach((item, index) => {
+        const li = document.createElement(&#39;li&#39;);
+        li.className = &#39;breadcrumb-separator&#39;;
+        
+        if (index === breadcrumbData.length - 1) {
+          // Last item (current page) - not clickable
+          li.innerHTML = `<span data-type="text" class="text-base-content/70">${item.name}</span>`;
+        } else {
+          // Clickable items
+          li.innerHTML = `<a data-type="text" href="#" onclick="navigateTo(&#39;${item.pageId}&#39;)" class="text-primary hover:text-primary/80">${item.name}</a>`;
+        }
+        breadcrumbContainer.appendChild(li);
+      });
+    }
+  };
+
+  // Theme management
+  window.ThemeManager = {
+    setTheme: function(themeName) {
+      document.documentElement.setAttribute(&#39;data-theme&#39;, themeName);
+      localStorage.setItem(&#39;app-theme&#39;, themeName);
+    },
+
+    getTheme: function() {
+      return localStorage.getItem(&#39;app-theme&#39;) || &#39;light&#39;;
+    },
+
+    initTheme: function() {
+      const savedTheme = this.getTheme();
+      this.setTheme(savedTheme);
+    }
+  };
+
+  // Initialize theme on load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    window.ThemeManager.initTheme();
+  });
+
+})();
+</script><script>
+    function generateCaptchaCode(length = 4) {
+        const chars = &#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#39;;
+        let result = &#39;&#39;;
+        for (let i = 0; i < length; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    function refreshCaptcha() {
+        const captchaDisplay = document.getElementById(&#39;captcha-display&#39;);
+        if (captchaDisplay) {
+            captchaDisplay.textContent = generateCaptchaCode();
+        }
+    }
+
+    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+        // Initialize captcha on page load
+        refreshCaptcha();
+    });
+</script>
+  
+
+<script>
+    setTimeout(() => {
+      Holder.run({
+        domain: "placehold.co"
+      })
+    }, 100)
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

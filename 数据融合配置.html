@@ -1,0 +1,1992 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>数据融合配置</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login_page': '登录页',
+    'home_dashboard': '首页/仪表盘',
+    'resource_collection_overview': '资源采集总览',
+    'collection_task_management': '采集任务管理',
+    'create_edit_collection_task': '新建/编辑采集任务',
+    'collection_task_monitoring': '采集任务监控',
+    'information_source_management': '信息源管理',
+    'collection_node_management': '采集节点管理',
+    'data_cleaning_management': '数据清洗管理',
+    'data_quality_rule_config': '数据质量规则配置',
+    'auto_cleaning_task_config': '自动清洗任务配置',
+    'crowdsourcing_annotation_management': '群智标注任务管理',
+    'data_quality_cleaning_report': '数据质量/清洗评估报告',
+    'data_management_overview': '数据管理总览',
+    'data_fusion_config': '数据融合配置',
+    'source_db_table_management': '源数据库表管理',
+    'data_lifecycle_management': '数据生命周期管理',
+    'entity_data_management': '实体数据管理',
+    'data_processing_flow_config': '数据处理流程配置',
+    'data_entity_library_management': '数据实体库管理',
+    'api_service_management': 'API服务管理',
+    'data_service_monitoring': '数据服务监控',
+    'rule_discovery_overview': '规则发现总览',
+    'graph_extraction_task_management': '抽图任务管理',
+    'rule_discovery_task_config': '规则发现任务配置',
+    'rule_library_management': '规则库管理',
+    'create_edit_rule': '新建/编辑规则',
+    'rule_application_management': '规则应用任务管理',
+    'rule_application_monitoring': '规则应用监控',
+    'intelligence_mining_dashboard': '情报挖掘仪表盘',
+    'tech_intelligence_overview': '技术情报概览',
+    'development_trend_analysis': '发展态势与趋势分析',
+    'tech_hotspot_analysis': '技术热点分析',
+    'collaboration_analysis': '合作关系分析',
+    'ranking_analysis': '排行分析',
+    'academic_level_analysis': '学术水平分析',
+    'scholar_map': '学者地图',
+    'talent_mobility_analysis': '人才流动分析',
+    'auto_report_generation': '报告自动生成',
+    'scholar_profile_query': '学者画像查询',
+    'network_analysis': '网络分析',
+    'tech_panorama_analysis': '技术全景分析',
+    'expert_recommendation': '专家推荐',
+    'tech_traceability_analysis': '技术溯源分析',
+    'topic_mutation_analysis': '主题突变分析',
+    'dynamic_intelligence_recommendation': '动态情报推荐',
+    'thematic_intelligence_analysis': '专题情报分析',
+    'system_management': '系统管理',
+    'system_config': '系统配置',
+    'system_resource_monitoring': '系统资源监控',
+    'user_management': '用户管理',
+    'role_permission_management': '角色与权限管理',
+    'user_log_management': '用户日志管理',
+    'notification_center': '通知中心',
+    'data_import_export': '数据导入导出'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh-CN" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据融合配置 - 科技情报智能挖掘平台</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+/* CSS code for common usage*/
+/* daisyUI Theme Variables Customization
+* Based on the selected daisyUI theme and UI guidance requirements,
+* customize only the CSS variables that need to be different from the theme defaults.
+* Available theme variables for customization:
+*/
+/* Only modify if different from chosen theme defaults */
+:root {
+  /* Customize brand colors for tech intelligence system */
+  --color-primary: rgba(37, 99, 235, 1); /* Deep blue #2563eb */
+  --color-primary-content: rgba(255, 255, 255, 1);
+  --color-secondary: rgba(99, 102, 241, 1); /* Indigo #6366f1 */
+  --color-secondary-content: rgba(255, 255, 255, 1);
+  --color-accent: rgba(147, 197, 253, 1); /* Light blue #93c5fd */
+  --color-accent-content: rgba(37, 99, 235, 1);
+  --color-base-100: rgba(255, 255, 255, 1); /* Pure white for cards */
+  --color-base-200: rgba(249, 250, 251, 1); /* Light gray for sections */
+  --color-base-300: rgba(229, 231, 235, 1);
+  --color-base-content: rgba(31, 41, 55, 1); /* Dark gray for text */
+  --color-success: rgba(34, 197, 94, 1); /* Green #22c55e */
+  --color-warning: rgba(251, 191, 36, 1); /* Amber #fbbf24 */
+  --color-error: rgba(239, 68, 68, 1); /* Red #ef4444 */
+  --color-info: rgba(59, 130, 246, 1); /* Blue #3b82f6 */
+  --radius-box: 0.5rem; /* 8px for Apple-like friendly feel */
+  --radius-field: 0.375rem; /* 6px for form elements */
+}
+
+/* Additional custom styles for common usage */
+.header-height {
+  height: 64px;
+}
+
+.sidebar-width {
+  width: 256px; /* 16rem */
+}
+
+.mega-menu-transition {
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+.breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+/* Sidebar navigation styles */
+.sidebar-nav-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Content area spacing for dashboard layout */
+.main-content-area {
+  margin-left: 256px; /* 16rem - matches sidebar width */
+  min-height: calc(100vh - 64px); /* Full height minus header */
+}
+
+@media (max-width: 1024px) {
+  .main-content-area {
+    margin-left: 0;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-base-300);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base-content);
+  opacity: 0.5;
+}
+</style>
+    <style>
+/* Page-specific styles for data fusion configuration */
+
+/* Multiselect component styles */
+.multiselect-component .multiselect-btn {
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    transition: all 0.2s ease-in-out;
+}
+
+.multiselect-component .multiselect-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-base-200);
+}
+
+.multiselect-component .multiselect-menu {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--color-base-300);
+}
+
+.multiselect-component .multiselect-display {
+    border: 1px solid var(--color-base-300);
+    min-height: 2.5rem;
+}
+
+/* Configuration step cards */
+.card[data-type="config-step"] {
+    transition: all 0.3s ease-in-out;
+}
+
+.card[data-type="config-step"]:hover {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Steps component customization */
+.steps .step-primary::before {
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+}
+
+.steps .step::before {
+    border-color: var(--color-base-300);
+    background-color: var(--color-base-100);
+}
+
+/* Range slider customization */
+.range::-webkit-slider-thumb {
+    background-color: var(--color-primary);
+}
+
+.range::-moz-range-thumb {
+    background-color: var(--color-primary);
+}
+
+/* Template cards hover effect */
+.card.cursor-pointer:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Field mapping visualization */
+.field-mapping-line {
+    stroke: var(--color-primary);
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+    animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+    to {
+        stroke-dashoffset: -10;
+    }
+}
+
+/* Validation status indicators */
+.stat-value.text-warning {
+    color: var(--color-warning) !important;
+}
+
+.stat-value.text-success {
+    color: var(--color-success) !important;
+}
+
+.stat-value.text-primary {
+    color: var(--color-primary) !important;
+}
+
+/* Form control spacing improvements */
+.form-control + .form-control {
+    margin-top: 1rem;
+}
+
+/* Button group spacing */
+.btn + .btn {
+    margin-left: 0.5rem;
+}
+
+/* Card body padding adjustments for better spacing */
+.card-body > .space-y-6 > * + * {
+    margin-top: 1.5rem;
+}
+
+/* Tooltip content styling */
+.tooltip-content {
+    background-color: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading and transition states */
+.loading-overlay {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .card[data-type="config-step"] .card-body {
+        padding: 1rem;
+    }
+    
+    .steps.steps-vertical {
+        margin: 2rem 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid.grid-cols-1.lg\\:grid-cols-2,
+    .grid.grid-cols-1.lg\\:grid-cols-3 {
+        gap: 1rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        margin: 0.25rem 0;
+    }
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-base-100 min-h-screen flex flex-col">
+    <!-- Header -->
+    <div data-section-id="common_header" data-section-type="common_header" class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 header-height px-4 lg:px-8">
+  <!-- Mobile Menu Button &amp; Logo Section -->
+  <div class="navbar-start">
+    <button data-type="button" onclick="SidebarNavigation.toggleSidebar()" class="btn btn-ghost lg:hidden">
+      <span class="iconify" data-icon="heroicons:bars-3" data-width="24"></span>
+    </button>
+    
+    <button data-type="button" onclick="navigateTo(&#39;home_dashboard&#39;)" class="btn btn-ghost normal-case text-xl font-bold text-primary ml-2 lg:ml-0">
+      <span class="iconify" data-icon="heroicons:chart-bar-square" data-width="32"></span>
+      <span data-type="text">科技指数计算工具库</span>
+    </button>
+  </div>
+
+  <!-- Desktop Navigation - Hidden on mobile, sidebar takes over -->
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1 gap-2">
+      <li>
+        <button data-type="button" data-nav-item="home_dashboard" onclick="navigateTo(&#39;home_dashboard&#39;)" class="btn btn-ghost">
+          <span data-type="text">首页</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="resource_collection_overview" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">资源采集</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="data_management_overview" onclick="navigateTo(&#39;data_management_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">数据管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="rule_discovery_overview" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">规则发现</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="intelligence_mining_dashboard" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="btn btn-ghost">
+          <span data-type="text">情报挖掘</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="navbar-end gap-2">
+    <!-- Search Button -->
+    <button data-type="button" class="btn btn-ghost btn-circle">
+      <span class="iconify" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+    </button>
+    
+    <!-- Notifications -->
+    <div data-type="container" class="dropdown dropdown-end">
+      <button data-type="button" class="btn btn-ghost btn-circle">
+        <div class="indicator">
+          <span class="iconify" data-icon="heroicons:bell" data-width="20"></span>
+          <span class="badge badge-xs badge-primary indicator-item"></span>
+        </div>
+      </button>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80">
+        <li class="menu-title">
+          <span data-type="text">通知中心</span>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)">
+            <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="16"></span>
+            <span data-type="text">数据采集任务完成</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)">
+            <span class="iconify text-warning" data-icon="heroicons:exclamation-triangle" data-width="16"></span>
+            <span data-type="text">系统资源使用率过高</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)" class="btn btn-ghost btn-sm">
+            <span data-type="text">查看全部通知</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- User Menu -->
+    <div data-type="container" class="dropdown dropdown-end">
+      <label tabindex="0" class="btn btn-ghost btn-circle">
+        <div class="avatar placeholder inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-content">
+          <span class="flex items-center justify-center h-full font-semibold text-sm">管</span>
+        </div>
+      </label>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+        <li class="menu-title">
+          <span data-type="text">管理员</span>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;user_management&#39;)">
+            <span class="iconify" data-icon="heroicons:user-circle" data-width="16"></span>
+            <span data-type="text">个人资料</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="16"></span>
+            <span data-type="text">系统设置</span>
+          </button>
+        </li>
+        <li><div class="divider my-1"></div></li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;login_page&#39;)">
+            <span class="iconify" data-icon="heroicons:arrow-right-on-rectangle" data-width="16"></span>
+            <span data-type="text">退出登录</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+[data-section-id="common_header"] .navbar {
+  min-height: 64px;
+}
+
+[data-section-id="common_header"] .dropdown:hover .dropdown-content {
+  display: block;
+}
+
+[data-section-id="common_header"] .avatar.placeholder {
+  transition: all 0.2s ease-in-out;
+}
+
+[data-section-id="common_header"] .avatar.placeholder:hover {
+  transform: scale(1.05);
+}
+</style>
+
+<script>
+(function() {
+  // Initialize header on page load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Close dropdowns when clicking outside
+    document.addEventListener(&#39;click&#39;, function(e) {
+      const dropdowns = document.querySelectorAll(&#39;[data-section-id="common_header"] .dropdown&#39;);
+      dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(e.target)) {
+          const content = dropdown.querySelector(&#39;.dropdown-content&#39;);
+          if (content) {
+            content.classList.remove(&#39;dropdown-open&#39;);
+          }
+        }
+      });
+    });
+  });
+})();
+</script>
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden" onclick="SidebarNavigation.closeSidebar()"></div>
+    
+    <!-- Sidebar -->
+    <div data-section-id="common_sidebar" data-section-type="common_sidebar" class="fixed inset-y-0 left-0 z-40 sidebar-width bg-base-100 border-r border-base-300 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="main-sidebar">
+  <!-- Sidebar Header -->
+  <div class="flex items-center justify-between p-4 border-b border-base-300">
+    <h2 data-type="text" class="text-lg font-semibold text-base-content">功能导航</h2>
+    <button data-type="button" onclick="SidebarNavigation.closeSidebar()" class="btn btn-ghost btn-sm btn-circle lg:hidden">
+      <span class="iconify" data-icon="heroicons:x-mark" data-width="16"></span>
+    </button>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="flex-1 overflow-y-auto sidebar-scroll p-4">
+    <ul class="menu menu-vertical w-full gap-1">
+      <!-- Dashboard -->
+      <li>
+        <button data-type="button" data-sidebar-nav="home_dashboard" onclick="navigateTo(&#39;home_dashboard&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:chart-pie" data-width="20"></span>
+          <span data-type="text">首页仪表盘</span>
+        </button>
+      </li>
+
+      <!-- Resource Collection Section -->
+      <li class="menu-title">
+        <span data-type="text">资源采集</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="resource_collection_overview" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:archive-box" data-width="20"></span>
+          <span data-type="text">资源采集总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="collection-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;collection-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="20"></span>
+            <span data-type="text">采集任务管理</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="collection-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="collection_task_management" onclick="navigateTo(&#39;collection_task_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:list-bullet" data-width="16"></span>
+              <span data-type="text">任务列表</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="create_edit_collection_task" onclick="navigateTo(&#39;create_edit_collection_task&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:plus-circle" data-width="16"></span>
+              <span data-type="text">新建任务</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="collection_task_monitoring" onclick="navigateTo(&#39;collection_task_monitoring&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:chart-bar" data-width="16"></span>
+              <span data-type="text">监控状态</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="information_source_management" onclick="navigateTo(&#39;information_source_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:server" data-width="20"></span>
+          <span data-type="text">信息源管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="collection_node_management" onclick="navigateTo(&#39;collection_node_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:cpu-chip" data-width="20"></span>
+          <span data-type="text">采集节点管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="cleaning-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;cleaning-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:sparkles" data-width="20"></span>
+            <span data-type="text">数据清洗</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="cleaning-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="data_cleaning_management" onclick="navigateTo(&#39;data_cleaning_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:adjustments-horizontal" data-width="16"></span>
+              <span data-type="text">清洗管理</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="data_quality_rule_config" onclick="navigateTo(&#39;data_quality_rule_config&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:shield-check" data-width="16"></span>
+              <span data-type="text">质量规则配置</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Data Management Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">数据管理</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="data_management_overview" onclick="navigateTo(&#39;data_management_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:circle-stack" data-width="20"></span>
+          <span data-type="text">数据管理总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="entity_data_management" onclick="navigateTo(&#39;entity_data_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:squares-2x2" data-width="20"></span>
+          <span data-type="text">实体数据管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="api_service_management" onclick="navigateTo(&#39;api_service_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:code-bracket" data-width="20"></span>
+          <span data-type="text">API服务管理</span>
+        </button>
+      </li>
+
+      <!-- Rule Discovery Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">规则发现</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="rule_discovery_overview" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:light-bulb" data-width="20"></span>
+          <span data-type="text">规则发现总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="rule_library_management" onclick="navigateTo(&#39;rule_library_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:book-open" data-width="20"></span>
+          <span data-type="text">规则库管理</span>
+        </button>
+      </li>
+
+      <!-- Intelligence Mining Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">情报挖掘</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="intelligence_mining_dashboard" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:chart-bar-square" data-width="20"></span>
+          <span data-type="text">情报挖掘仪表盘</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="analysis-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;analysis-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:magnifying-glass-circle" data-width="20"></span>
+            <span data-type="text">分析工具</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="analysis-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="tech_intelligence_overview" onclick="navigateTo(&#39;tech_intelligence_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+              <span data-type="text">技术情报概览</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="scholar_profile_query" onclick="navigateTo(&#39;scholar_profile_query&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:user-group" data-width="16"></span>
+              <span data-type="text">学者画像查询</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="network_analysis" onclick="navigateTo(&#39;network_analysis&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:share" data-width="16"></span>
+              <span data-type="text">网络分析</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      <!-- System Management Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">系统管理</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="system_management" onclick="navigateTo(&#39;system_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:cog-8-tooth" data-width="20"></span>
+          <span data-type="text">系统管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="user_management" onclick="navigateTo(&#39;user_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:users" data-width="20"></span>
+          <span data-type="text">用户管理</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-base-content/50 z-30 lg:hidden hidden" onclick="SidebarNavigation.closeSidebar()"></div>
+
+<style>
+[data-section-id="common_sidebar"] {
+  top: 64px; /* Start below header */
+  height: calc(100vh - 64px); /* Full height minus header */
+}
+
+[data-section-id="common_sidebar"] .sidebar-nav-item {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 400;
+}
+
+[data-section-id="common_sidebar"] .menu-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-base-content);
+  opacity: 0.6;
+  margin: 1rem 0 0.5rem 0;
+  padding: 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-section-id="common_sidebar"] .submenu-arrow {
+  transition: transform 0.2s ease-in-out;
+}
+
+@media (max-width: 1024px) {
+  [data-section-id="common_sidebar"] {
+    top: 0;
+    height: 100vh;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Initialize sidebar functionality
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Handle escape key to close sidebar on mobile
+    document.addEventListener(&#39;keydown&#39;, function(e) {
+      if (e.key === &#39;Escape&#39;) {
+        SidebarNavigation.closeSidebar();
+      }
+    });
+    
+    // Handle window resize
+    window.addEventListener(&#39;resize&#39;, function() {
+      if (window.innerWidth >= 1024) {
+        // Desktop: ensure sidebar is visible and overlay is hidden
+        const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+        const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+        
+        if (sidebar) sidebar.classList.remove(&#39;-translate-x-full&#39;);
+        if (overlay) overlay.classList.add(&#39;hidden&#39;);
+      }
+    });
+  });
+})();
+</script>
+    
+    <!-- Main Content Area -->
+    <div class="flex-1 lg:ml-64">
+        <!-- Breadcrumb -->
+        <div data-section-id="common_breadcrumb" data-section-type="common_section" class="bg-base-200 py-4 px-4 lg:px-8">
+  <div data-type="container" class="max-w-full ml-0 lg:ml-64">
+    <div class="text-sm breadcrumbs">
+      <ul>
+        <li class="breadcrumb-separator">
+          <a data-type="text" href="#" onclick="navigateTo(&#39;home_dashboard&#39;)" class="flex items-center gap-1 text-primary hover:text-primary/80">
+            <span class="iconify" data-icon="heroicons:home-solid" data-width="16"></span>
+            <span>首页</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+[data-section-id="common_breadcrumb"] .breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+[data-section-id="common_breadcrumb"] .breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+[data-section-id="common_breadcrumb"] a {
+  transition: color 0.2s ease-in-out;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 1024px) {
+  [data-section-id="common_breadcrumb"] .max-w-full {
+    margin-left: 0;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Breadcrumb component is managed through the global BreadcrumbNavigation object
+  // Usage example:
+  // BreadcrumbNavigation.updateBreadcrumb([
+  //   { name: &#39;首页&#39;, pageId: &#39;home_dashboard&#39; },
+  //   { name: &#39;资源采集&#39;, pageId: &#39;resource_collection_overview&#39; },
+  //   { name: &#39;采集任务管理&#39;, pageId: &#39;collection_task_management&#39; }
+  // ]);
+})();
+</script>
+        
+        <!-- Main Content -->
+        <main class="px-4 lg:px-8 py-8 bg-base-100">
+            <!-- Page Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-4">
+                    <button onclick="navigateTo(&#39;data_management_overview&#39;)" class="btn btn-ghost btn-sm">
+                        <span class="iconify" data-icon="heroicons:arrow-left" data-width="20"></span>
+                        返回
+                    </button>
+                    <div>
+                        <h1 class="text-3xl font-bold text-base-content">数据融合配置</h1>
+                        <p class="text-base-content/70 mt-2">配置多源异构数据的融合策略，包括格式转换、结构重组和语义匹配规则</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button class="btn btn-outline btn-sm" onclick="previewFusionStrategy()">
+                        <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+                        预览策略
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="saveFusionConfig()">
+                        <span class="iconify" data-icon="heroicons:check" data-width="16"></span>
+                        保存配置
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="publishFusionStrategy()">
+                        <span class="iconify" data-icon="heroicons:rocket-launch" data-width="16"></span>
+                        发布策略
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fusion Strategy Templates -->
+            <div class="card bg-base-100 shadow-sm border border-base-300 mb-8">
+                <div class="card-body">
+                    <h2 class="card-title text-lg mb-4">
+                        <span class="iconify text-primary" data-icon="heroicons:template" data-width="20"></span>
+                        常用融合策略模板
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="card bg-base-200 cursor-pointer hover:bg-primary/10 transition-colors" onclick="loadTemplate(&#39;standard&#39;)">
+                            <div class="card-body p-4">
+                                <h3 class="font-semibold">标准数据融合</h3>
+                                <p class="text-sm text-base-content/70">适用于结构化数据的基础融合</p>
+                            </div>
+                        </div>
+                        <div class="card bg-base-200 cursor-pointer hover:bg-primary/10 transition-colors" onclick="loadTemplate(&#39;semantic&#39;)">
+                            <div class="card-body p-4">
+                                <h3 class="font-semibold">语义增强融合</h3>
+                                <p class="text-sm text-base-content/70">包含实体识别和语义匹配</p>
+                            </div>
+                        </div>
+                        <div class="card bg-base-200 cursor-pointer hover:bg-primary/10 transition-colors" onclick="loadTemplate(&#39;realtime&#39;)">
+                            <div class="card-body p-4">
+                                <h3 class="font-semibold">实时流式融合</h3>
+                                <p class="text-sm text-base-content/70">支持实时数据流处理</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fusion Process Steps -->
+            <div class="steps steps-vertical lg:steps-horizontal w-full mb-8">
+                <div class="step step-primary">数据源选择</div>
+                <div class="step step-primary">格式转换</div>
+                <div class="step step-primary">结构重组</div>
+                <div class="step">语义匹配</div>
+                <div class="step">策略验证</div>
+            </div>
+
+            <!-- Configuration Cards -->
+            <div class="space-y-8">
+                <!-- Step 1: Data Source Selection -->
+                <div class="card bg-base-100 shadow-sm border border-base-300" data-repeatable="true" data-type="config-step">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="card-title text-xl">
+                                <span class="badge badge-primary badge-lg">1</span>
+                                数据源选择
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <div class="tooltip" data-tip="选择需要融合的数据源">
+                                    <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="20"></span>
+                                </div>
+                                <label class="label cursor-pointer gap-2">
+                                    <span class="label-text text-sm">启用此步骤</span>
+                                    <input type="checkbox" class="toggle toggle-primary" checked="">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">主数据源</span>
+                                </label>
+                                <select class="select select-bordered">
+                                    <option disabled="" selected="">选择主数据源</option>
+                                    <option>学术论文数据库</option>
+                                    <option>专利信息库</option>
+                                    <option>科技新闻数据</option>
+                                    <option>研究报告库</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">辅助数据源</span>
+                                </label>
+                                <div class="multiselect-component">
+                                    <div class="dropdown w-full">
+                                        <button tabindex="0" role="button" class="btn w-full justify-between multiselect-btn">
+                                            <span>选择辅助数据源</span>
+                                            <span class="iconify" data-icon="heroicons:chevron-down" data-width="16"></span>
+                                        </button>
+                                        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full mt-2 multiselect-menu">
+                                            <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">机构信息库</span> <input type="checkbox" value="机构信息库" class="checkbox checkbox-primary multiselect-checkbox"></label></li>
+                                            <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">学者档案库</span> <input type="checkbox" value="学者档案库" class="checkbox checkbox-primary multiselect-checkbox"></label></li>
+                                            <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">期刊影响因子</span> <input type="checkbox" value="期刊影响因子" class="checkbox checkbox-primary multiselect-checkbox"></label></li>
+                                            <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">引用关系网</span> <input type="checkbox" value="引用关系网" class="checkbox checkbox-primary multiselect-checkbox"></label></li>
+                                        </ul>
+                                    </div>
+                                    <div class="w-full mt-4">
+                                        <div class="flex flex-wrap gap-2 min-h-[2.5rem] p-2 bg-base-200 rounded-lg multiselect-display">
+                                            <span class="text-base-content/50">暂无选择</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end mt-6">
+                            <button class="btn btn-primary" onclick="validateDataSources()">
+                                <span class="iconify" data-icon="heroicons:check-circle" data-width="16"></span>
+                                验证数据源
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Format Conversion -->
+                <div class="card bg-base-100 shadow-sm border border-base-300" data-repeatable="true" data-type="config-step">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="card-title text-xl">
+                                <span class="badge badge-primary badge-lg">2</span>
+                                格式转换配置
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <div class="tooltip" data-tip="配置数据格式转换规则">
+                                    <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="20"></span>
+                                </div>
+                                <label class="label cursor-pointer gap-2">
+                                    <span class="label-text text-sm">启用此步骤</span>
+                                    <input type="checkbox" class="toggle toggle-primary" checked="">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-medium">源格式</span>
+                                    </label>
+                                    <select class="select select-bordered select-sm">
+                                        <option>JSON</option>
+                                        <option>XML</option>
+                                        <option>CSV</option>
+                                        <option>Excel</option>
+                                        <option>数据库表</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-medium">目标格式</span>
+                                    </label>
+                                    <select class="select select-bordered select-sm">
+                                        <option>标准JSON</option>
+                                        <option>RDF三元组</option>
+                                        <option>知识图谱</option>
+                                        <option>关系表</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-medium">编码格式</span>
+                                    </label>
+                                    <select class="select select-bordered select-sm">
+                                        <option>UTF-8</option>
+                                        <option>GBK</option>
+                                        <option>ASCII</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">转换规则</span>
+                                </label>
+                                <textarea class="textarea textarea-bordered h-24" placeholder="输入自定义转换规则或选择预设规则..."></textarea>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <button class="btn btn-outline btn-sm" onclick="addConversionRule()">
+                                    <span class="iconify" data-icon="heroicons:plus" data-width="16"></span>
+                                    添加规则
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="previewConversion()">
+                                    <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+                                    预览转换
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Structure Reorganization -->
+                <div class="card bg-base-100 shadow-sm border border-base-300" data-repeatable="true" data-type="config-step">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="card-title text-xl">
+                                <span class="badge badge-primary badge-lg">3</span>
+                                结构重组配置
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <div class="tooltip" data-tip="配置数据结构重组和字段映射">
+                                    <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="20"></span>
+                                </div>
+                                <label class="label cursor-pointer gap-2">
+                                    <span class="label-text text-sm">启用此步骤</span>
+                                    <input type="checkbox" class="toggle toggle-primary" checked="">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="card bg-base-200">
+                                    <div class="card-body p-4">
+                                        <h3 class="font-semibold mb-3">源字段结构</h3>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">title</span>
+                                                <span class="badge badge-outline badge-xs">String</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">author_name</span>
+                                                <span class="badge badge-outline badge-xs">String</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">publish_date</span>
+                                                <span class="badge badge-outline badge-xs">Date</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">keywords</span>
+                                                <span class="badge badge-outline badge-xs">Array</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card bg-base-200">
+                                    <div class="card-body p-4">
+                                        <h3 class="font-semibold mb-3">目标字段结构</h3>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">标题</span>
+                                                <span class="badge badge-primary badge-xs">已映射</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">作者</span>
+                                                <span class="badge badge-primary badge-xs">已映射</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">发布时间</span>
+                                                <span class="badge badge-primary badge-xs">已映射</span>
+                                            </div>
+                                            <div class="flex items-center justify-between p-2 bg-base-100 rounded">
+                                                <span class="text-sm">关键词</span>
+                                                <span class="badge badge-warning badge-xs">待映射</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <button class="btn btn-outline btn-sm" onclick="autoMapFields()">
+                                    <span class="iconify" data-icon="heroicons:sparkles" data-width="16"></span>
+                                    智能映射
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="addCustomMapping()">
+                                    <span class="iconify" data-icon="heroicons:plus" data-width="16"></span>
+                                    自定义映射
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="validateMapping()">
+                                    <span class="iconify" data-icon="heroicons:check-circle" data-width="16"></span>
+                                    验证映射
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Semantic Matching -->
+                <div class="card bg-base-100 shadow-sm border border-base-300" data-repeatable="true" data-type="config-step">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="card-title text-xl">
+                                <span class="badge badge-outline badge-lg">4</span>
+                                语义匹配配置
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <div class="tooltip" data-tip="配置语义匹配和实体识别规则">
+                                    <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="20"></span>
+                                </div>
+                                <label class="label cursor-pointer gap-2">
+                                    <span class="label-text text-sm">启用此步骤</span>
+                                    <input type="checkbox" class="toggle toggle-primary">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-medium">实体识别模型</span>
+                                    </label>
+                                    <select class="select select-bordered">
+                                        <option disabled="" selected="">选择实体识别模型</option>
+                                        <option>BERT-NER</option>
+                                        <option>BiLSTM-CRF</option>
+                                        <option>自定义模型</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-control">
+                                    <label class="label">
+                                        <span class="label-text font-medium">相似度阈值</span>
+                                    </label>
+                                    <div class="flex items-center gap-4">
+                                        <input type="range" min="0" max="100" value="80" class="range range-primary flex-1">
+                                        <span class="text-sm font-mono">0.80</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">语义匹配规则</span>
+                                </label>
+                                <div class="space-y-3">
+                                    <label class="label cursor-pointer justify-start gap-3">
+                                        <input type="checkbox" class="checkbox checkbox-primary" checked="">
+                                        <span class="label-text">启用同义词匹配</span>
+                                    </label>
+                                    <label class="label cursor-pointer justify-start gap-3">
+                                        <input type="checkbox" class="checkbox checkbox-primary" checked="">
+                                        <span class="label-text">启用实体链接</span>
+                                    </label>
+                                    <label class="label cursor-pointer justify-start gap-3">
+                                        <input type="checkbox" class="checkbox checkbox-primary">
+                                        <span class="label-text">启用关系抽取</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <button class="btn btn-outline btn-sm" onclick="testSemanticMatching()">
+                                    <span class="iconify" data-icon="heroicons:beaker" data-width="16"></span>
+                                    测试匹配
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="viewMatchingResults()">
+                                    <span class="iconify" data-icon="heroicons:chart-bar" data-width="16"></span>
+                                    查看结果
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Strategy Validation -->
+                <div class="card bg-base-100 shadow-sm border border-base-300" data-repeatable="true" data-type="config-step">
+                    <div class="card-body">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="card-title text-xl">
+                                <span class="badge badge-outline badge-lg">5</span>
+                                策略验证与发布
+                            </h2>
+                            <div class="flex items-center gap-2">
+                                <div class="tooltip" data-tip="验证融合策略的有效性">
+                                    <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="20"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                                <div class="stat bg-base-200 rounded-lg">
+                                    <div class="stat-title">数据源数量</div>
+                                    <div class="stat-value text-primary">4</div>
+                                    <div class="stat-desc">已配置数据源</div>
+                                </div>
+                                <div class="stat bg-base-200 rounded-lg">
+                                    <div class="stat-title">字段映射</div>
+                                    <div class="stat-value text-success">95%</div>
+                                    <div class="stat-desc">映射完成度</div>
+                                </div>
+                                <div class="stat bg-base-200 rounded-lg">
+                                    <div class="stat-title">验证状态</div>
+                                    <div class="stat-value text-warning">待验证</div>
+                                    <div class="stat-desc">需要运行验证</div>
+                                </div>
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">策略名称</span>
+                                </label>
+                                <input type="text" placeholder="输入融合策略名称" class="input input-bordered">
+                            </div>
+
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text font-medium">策略描述</span>
+                                </label>
+                                <textarea class="textarea textarea-bordered h-20" placeholder="描述此融合策略的用途和特点..."></textarea>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <button class="btn btn-primary" onclick="runValidation()">
+                                    <span class="iconify" data-icon="heroicons:play" data-width="16"></span>
+                                    运行验证
+                                </button>
+                                <button class="btn btn-outline" onclick="exportStrategy()">
+                                    <span class="iconify" data-icon="heroicons:arrow-down-tray" data-width="16"></span>
+                                    导出策略
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Fusion Flow Diagram -->
+            <div class="card bg-base-100 shadow-sm border border-base-300 mt-8">
+                <div class="card-body">
+                    <h2 class="card-title text-lg mb-4">
+                        <span class="iconify text-primary" data-icon="heroicons:chart-bar-square" data-width="20"></span>
+                        数据融合流程图
+                    </h2>
+                    <div class="bg-base-200 rounded-lg p-6 min-h-[300px] flex items-center justify-center">
+                        <div class="text-center">
+                            <span class="iconify text-base-content/50" data-icon="heroicons:chart-bar-square" data-width="64"></span>
+                            <p class="text-base-content/70 mt-4">数据融合流程可视化图表</p>
+                            <p class="text-sm text-base-content/50">显示数据流向和处理阶段</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <div data-section-id="common_footer" data-section-type="common_footer" class="bg-base-200 text-base-content mt-auto">
+  <!-- Main Footer Content -->
+  <footer class="footer footer-center p-10 max-w-full ml-0 lg:ml-64">
+    <!-- System Info -->
+    <aside class="flex flex-col items-center">
+      <div data-type="container" class="flex items-center gap-3 mb-4">
+        <span class="iconify text-primary" data-icon="heroicons:chart-bar-square" data-width="32"></span>
+        <h3 data-type="text" class="text-xl font-bold text-primary">科技指数计算工具库</h3>
+      </div>
+      <div data-type="container" class="text-sm space-y-2 text-center max-w-2xl">
+        <p data-type="text" class="text-base-content/80">
+          基于多源科技信息采集与智能分析，为技术链深度解析、产业竞争格局分析、科技创新趋势提供数据情报支撑
+        </p>
+        <p data-type="text" class="flex items-center gap-1 justify-center">
+          <span class="iconify" data-icon="heroicons:shield-check" data-width="16"></span>
+          数据安全 · 智能分析 · 精准情报
+        </p>
+      </div>
+    </aside>
+
+    <!-- Quick Links -->
+    <nav class="grid grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-4xl">
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">资源采集</header>
+        <button data-type="button" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">采集总览</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;collection_task_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">任务管理</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;data_cleaning_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">数据清洗</span>
+        </button>
+      </div>
+      
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">数据管理</header>
+        <button data-type="button" onclick="navigateTo(&#39;data_management_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">管理总览</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;entity_data_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">实体数据</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;api_service_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">API服务</span>
+        </button>
+      </div>
+      
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">规则发现</header>
+        <button data-type="button" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">发现总览</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;rule_library_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">规则库管理</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;graph_extraction_task_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">抽图任务</span>
+        </button>
+      </div>
+      
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">情报挖掘</header>
+        <button data-type="button" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="link link-hover block text-left">
+          <span data-type="text">挖掘仪表盘</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;tech_intelligence_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">技术情报</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;scholar_profile_query&#39;)" class="link link-hover block text-left">
+          <span data-type="text">学者画像</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- System Links -->
+    <nav class="flex flex-wrap justify-center gap-6">
+      <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="16"></span>
+        <span data-type="text">系统设置</span>
+      </button>
+      <button data-type="button" onclick="navigateTo(&#39;user_management&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:users" data-width="16"></span>
+        <span data-type="text">用户管理</span>
+      </button>
+      <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:bell" data-width="16"></span>
+        <span data-type="text">通知中心</span>
+      </button>
+      <button data-type="button" onclick="navigateTo(&#39;data_import_export&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:arrow-down-tray" data-width="16"></span>
+        <span data-type="text">数据导入导出</span>
+      </button>
+    </nav>
+  </footer>
+
+  <!-- Bottom Footer Bar -->
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content border-t border-base-content/10">
+    <aside class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 max-w-full ml-0 lg:ml-64 w-full justify-center">
+      <p data-type="text" class="text-sm">© 2025 科技指数计算工具库. All rights reserved.</p>
+      <div data-type="container" class="flex gap-4 text-sm">
+        <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover">
+          <span data-type="text">使用条款</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover">
+          <span data-type="text">隐私政策</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover">
+          <span data-type="text">技术支持</span>
+        </button>
+      </div>
+    </aside>
+  </footer>
+</div>
+
+<style>
+[data-section-id="common_footer"] .footer-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+[data-section-id="common_footer"] .link-hover {
+  transition: color 0.2s ease-in-out;
+  font-size: 0.875rem;
+}
+
+[data-section-id="common_footer"] .link-hover:hover {
+  color: var(--color-primary);
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 1024px) {
+  [data-section-id="common_footer"] footer {
+    margin-left: 0;
+  }
+  
+  [data-section-id="common_footer"] aside {
+    margin-left: 0;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Footer component functionality
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Add smooth hover effects for footer links
+    const footerLinks = document.querySelectorAll(&#39;[data-section-id="common_footer"] .link-hover&#39;);
+    footerLinks.forEach(link => {
+      link.addEventListener(&#39;mouseenter&#39;, function() {
+        this.style.transform = &#39;translateX(2px)&#39;;
+      });
+      
+      link.addEventListener(&#39;mouseleave&#39;, function() {
+        this.style.transform = &#39;translateX(0)&#39;;
+      });
+    });
+  });
+})();
+</script>
+
+    <script>
+/* JavaScript code for common usage, should be wrapped in a closure */
+(function() {
+  // Initialize global namespace
+  window.APP_GLOBALS = window.APP_GLOBALS || {};
+
+  // Navigation function for page transitions
+  window.navigateTo = function(targetPageId) {
+    const isInIframe = window.self !== window.top;
+    const targetFileName = `${targetPageId}.html`;
+    
+    if (isInIframe) {
+      window.parent.postMessage({
+        type: &#39;iframeNavigation&#39;,
+        targetPageId: targetPageId
+      }, &#39;*&#39;);
+    } else {
+      window.location.href = targetFileName;
+    }
+  };
+
+  // Header navigation state management
+  window.HeaderNavigation = {
+    setActiveNavItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-nav-item]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-nav-item&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleMobileMenu: function() {
+      const mobileMenu = document.getElementById(&#39;mobile-nav-menu&#39;);
+      const hamburger = document.getElementById(&#39;hamburger-icon&#39;);
+      const closeIcon = document.getElementById(&#39;close-icon&#39;);
+      
+      if (mobileMenu.classList.contains(&#39;hidden&#39;)) {
+        mobileMenu.classList.remove(&#39;hidden&#39;);
+        hamburger.classList.add(&#39;hidden&#39;);
+        closeIcon.classList.remove(&#39;hidden&#39;);
+      } else {
+        mobileMenu.classList.add(&#39;hidden&#39;);
+        hamburger.classList.remove(&#39;hidden&#39;);
+        closeIcon.classList.add(&#39;hidden&#39;);
+      }
+    }
+  };
+
+  // Sidebar navigation management
+  window.SidebarNavigation = {
+    setActiveMenuItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-sidebar-nav]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-sidebar-nav&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        const isHidden = sidebar.classList.contains(&#39;-translate-x-full&#39;);
+        
+        if (isHidden) {
+          sidebar.classList.remove(&#39;-translate-x-full&#39;);
+          overlay.classList.remove(&#39;hidden&#39;);
+        } else {
+          sidebar.classList.add(&#39;-translate-x-full&#39;);
+          overlay.classList.add(&#39;hidden&#39;);
+        }
+      }
+    },
+
+    closeSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        sidebar.classList.add(&#39;-translate-x-full&#39;);
+        overlay.classList.add(&#39;hidden&#39;);
+      }
+    },
+
+    toggleSubmenu: function(submenuId) {
+      const submenu = document.getElementById(submenuId);
+      const arrow = document.querySelector(`[data-submenu-trigger="${submenuId}"] .submenu-arrow`);
+      
+      if (submenu) {
+        const isHidden = submenu.classList.contains(&#39;hidden&#39;);
+        
+        if (isHidden) {
+          submenu.classList.remove(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(90deg)&#39;;
+        } else {
+          submenu.classList.add(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(0deg)&#39;;
+        }
+      }
+    }
+  };
+
+  // Breadcrumb navigation management
+  window.BreadcrumbNavigation = {
+    updateBreadcrumb: function(breadcrumbData) {
+      const breadcrumbContainer = document.querySelector(&#39;[data-section-id="common_breadcrumb"] .breadcrumbs ul&#39;);
+      if (!breadcrumbContainer) return;
+
+      breadcrumbContainer.innerHTML = &#39;&#39;;
+      breadcrumbData.forEach((item, index) => {
+        const li = document.createElement(&#39;li&#39;);
+        li.className = &#39;breadcrumb-separator&#39;;
+        
+        if (index === breadcrumbData.length - 1) {
+          // Last item (current page) - not clickable
+          li.innerHTML = `<span data-type="text" class="text-base-content/70">${item.name}</span>`;
+        } else {
+          // Clickable items
+          li.innerHTML = `<a data-type="text" href="#" onclick="navigateTo(&#39;${item.pageId}&#39;)" class="text-primary hover:text-primary/80">${item.name}</a>`;
+        }
+        breadcrumbContainer.appendChild(li);
+      });
+    }
+  };
+
+  // Theme management
+  window.ThemeManager = {
+    setTheme: function(themeName) {
+      document.documentElement.setAttribute(&#39;data-theme&#39;, themeName);
+      localStorage.setItem(&#39;app-theme&#39;, themeName);
+    },
+
+    getTheme: function() {
+      return localStorage.getItem(&#39;app-theme&#39;) || &#39;light&#39;;
+    },
+
+    initTheme: function() {
+      const savedTheme = this.getTheme();
+      this.setTheme(savedTheme);
+    }
+  };
+
+  // Initialize theme on load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    window.ThemeManager.initTheme();
+  });
+
+})();
+</script>
+    <script>
+(function() {
+    // Initialize page on load
+    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+        // Set active navigation items
+        if (typeof HeaderNavigation !== &#39;undefined&#39;) {
+            HeaderNavigation.setActiveNavItem(&#39;data_management_overview&#39;);
+        }
+        
+        if (typeof SidebarNavigation !== &#39;undefined&#39;) {
+            SidebarNavigation.setActiveMenuItem(&#39;data_fusion_config&#39;);
+        }
+        
+        // Set breadcrumb navigation
+        if (typeof BreadcrumbNavigation !== &#39;undefined&#39;) {
+            BreadcrumbNavigation.updateBreadcrumb([
+                { name: &#39;数据管理&#39;, pageId: &#39;data_management_overview&#39; },
+                { name: &#39;数据融合配置&#39;, pageId: &#39;data_fusion_config&#39; }
+            ]);
+        }
+        
+        // Initialize multiselect components
+        initializeMultiselect();
+        
+        // Initialize range sliders
+        initializeRangeSliders();
+        
+        // Initialize step progress
+        updateStepProgress();
+    });
+
+    // Multiselect component initialization
+    function initializeMultiselect() {
+        const allMultiselects = document.querySelectorAll(&#39;.multiselect-component&#39;);
+        allMultiselects.forEach(component => {
+            const dropdownBtn = component.querySelector(&#39;.multiselect-btn&#39;);
+            const dropdownMenu = component.querySelector(&#39;.multiselect-menu&#39;);
+            const checkboxes = component.querySelectorAll(&#39;.multiselect-checkbox&#39;);
+            const selectedDisplay = component.querySelector(&#39;.multiselect-display&#39;);
+
+            if (!dropdownBtn || !dropdownMenu || !checkboxes || !selectedDisplay) {
+                return;
+            }
+
+            const defaultBtnText = dropdownBtn.querySelector(&#39;span&#39;).textContent;
+
+            // Prevent dropdown menu from closing when clicking inside it
+            dropdownMenu.addEventListener(&#39;click&#39;, (e) => {
+                e.stopPropagation();
+            });
+
+            // Function to update the display state
+            function updateSelection() {
+                const selected = [];
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selected.push(checkbox.value);
+                    }
+                });
+
+                // Update button text
+                dropdownBtn.querySelector(&#39;span&#39;).textContent = selected.length === 0
+                    ? defaultBtnText
+                    : `${selected.length} 项已选择`;
+
+                // Update badge display area
+                selectedDisplay.innerHTML = &#39;&#39;;
+                if (selected.length === 0) {
+                    selectedDisplay.innerHTML = &#39;<span class="text-base-content/50">暂无选择</span>&#39;;
+                } else {
+                    selected.forEach(item => {
+                        const badge = document.createElement(&#39;div&#39;);
+                        badge.className = &#39;badge badge-primary badge-sm&#39;;
+                        badge.textContent = item;
+                        selectedDisplay.appendChild(badge);
+                    });
+                }
+            }
+
+            // Add event listeners to each checkbox
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener(&#39;change&#39;, updateSelection);
+            });
+
+            // Initialize state
+            updateSelection();
+        });
+    }
+
+    // Range slider initialization
+    function initializeRangeSliders() {
+        const rangeSliders = document.querySelectorAll(&#39;input[type="range"]&#39;);
+        rangeSliders.forEach(slider => {
+            const updateValue = () => {
+                const value = (slider.value / 100).toFixed(2);
+                const valueDisplay = slider.parentElement.querySelector(&#39;span&#39;);
+                if (valueDisplay) {
+                    valueDisplay.textContent = value;
+                }
+            };
+            
+            slider.addEventListener(&#39;input&#39;, updateValue);
+            updateValue(); // Initialize
+        });
+    }
+
+    // Step progress management
+    function updateStepProgress() {
+        const steps = document.querySelectorAll(&#39;.steps .step&#39;);
+        const configCards = document.querySelectorAll(&#39;[data-type="config-step"]&#39;);
+        
+        configCards.forEach((card, index) => {
+            const toggle = card.querySelector(&#39;.toggle&#39;);
+            if (toggle &amp;&amp; steps[index]) {
+                const updateStepStatus = () => {
+                    if (toggle.checked) {
+                        steps[index].classList.add(&#39;step-primary&#39;);
+                    } else {
+                        steps[index].classList.remove(&#39;step-primary&#39;);
+                    }
+                };
+                
+                toggle.addEventListener(&#39;change&#39;, updateStepStatus);
+                updateStepStatus(); // Initialize
+            }
+        });
+    }
+
+    // Template loading functions
+    window.loadTemplate = function(templateType) {
+        // Show loading state
+        showNotification(&#39;正在加载模板...&#39;, &#39;info&#39;);
+        
+        // Simulate template loading
+        setTimeout(() => {
+            switch(templateType) {
+                case &#39;standard&#39;:
+                    loadStandardTemplate();
+                    break;
+                case &#39;semantic&#39;:
+                    loadSemanticTemplate();
+                    break;
+                case &#39;realtime&#39;:
+                    loadRealtimeTemplate();
+                    break;
+            }
+            showNotification(&#39;模板加载成功&#39;, &#39;success&#39;);
+        }, 1000);
+    };
+
+    function loadStandardTemplate() {
+        // Enable first 3 steps
+        const toggles = document.querySelectorAll(&#39;.toggle&#39;);
+        toggles.forEach((toggle, index) => {
+            if (index < 3) {
+                toggle.checked = true;
+            } else {
+                toggle.checked = false;
+            }
+        });
+        updateStepProgress();
+    }
+
+    function loadSemanticTemplate() {
+        // Enable all steps
+        const toggles = document.querySelectorAll(&#39;.toggle&#39;);
+        toggles.forEach(toggle => {
+            toggle.checked = true;
+        });
+        updateStepProgress();
+    }
+
+    function loadRealtimeTemplate() {
+        // Enable specific steps for real-time processing
+        const toggles = document.querySelectorAll(&#39;.toggle&#39;);
+        toggles.forEach((toggle, index) => {
+            toggle.checked = index !== 3; // Skip semantic matching for real-time
+        });
+        updateStepProgress();
+    }
+
+    // Configuration functions
+    window.validateDataSources = function() {
+        showNotification(&#39;正在验证数据源连接...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;数据源验证成功&#39;, &#39;success&#39;);
+        }, 2000);
+    };
+
+    window.addConversionRule = function() {
+        showNotification(&#39;添加转换规则功能开发中&#39;, &#39;info&#39;);
+    };
+
+    window.previewConversion = function() {
+        showNotification(&#39;正在生成转换预览...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;转换预览已生成&#39;, &#39;success&#39;);
+        }, 1500);
+    };
+
+    window.autoMapFields = function() {
+        showNotification(&#39;正在执行智能字段映射...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            // Update mapping status
+            const badges = document.querySelectorAll(&#39;.badge-warning&#39;);
+            badges.forEach(badge => {
+                if (badge.textContent === &#39;待映射&#39;) {
+                    badge.textContent = &#39;已映射&#39;;
+                    badge.classList.remove(&#39;badge-warning&#39;);
+                    badge.classList.add(&#39;badge-primary&#39;);
+                }
+            });
+            showNotification(&#39;智能映射完成&#39;, &#39;success&#39;);
+        }, 2000);
+    };
+
+    window.addCustomMapping = function() {
+        showNotification(&#39;自定义映射功能开发中&#39;, &#39;info&#39;);
+    };
+
+    window.validateMapping = function() {
+        showNotification(&#39;正在验证字段映射...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;字段映射验证通过&#39;, &#39;success&#39;);
+        }, 1500);
+    };
+
+    window.testSemanticMatching = function() {
+        showNotification(&#39;正在测试语义匹配...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;语义匹配测试完成&#39;, &#39;success&#39;);
+        }, 2500);
+    };
+
+    window.viewMatchingResults = function() {
+        showNotification(&#39;查看匹配结果功能开发中&#39;, &#39;info&#39;);
+    };
+
+    window.runValidation = function() {
+        showNotification(&#39;正在运行完整验证...&#39;, &#39;info&#39;);
+        
+        // Update validation status
+        setTimeout(() => {
+            const statValue = document.querySelector(&#39;.stat-value.text-warning&#39;);
+            if (statValue &amp;&amp; statValue.textContent === &#39;待验证&#39;) {
+                statValue.textContent = &#39;验证通过&#39;;
+                statValue.classList.remove(&#39;text-warning&#39;);
+                statValue.classList.add(&#39;text-success&#39;);
+            }
+            showNotification(&#39;验证完成，策略配置正确&#39;, &#39;success&#39;);
+        }, 3000);
+    };
+
+    window.exportStrategy = function() {
+        showNotification(&#39;正在导出融合策略...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;策略导出成功&#39;, &#39;success&#39;);
+        }, 1000);
+    };
+
+    // Main action functions
+    window.previewFusionStrategy = function() {
+        showNotification(&#39;正在生成融合策略预览...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;策略预览已生成&#39;, &#39;success&#39;);
+        }, 2000);
+    };
+
+    window.saveFusionConfig = function() {
+        showNotification(&#39;正在保存配置...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;配置保存成功&#39;, &#39;success&#39;);
+        }, 1500);
+    };
+
+    window.publishFusionStrategy = function() {
+        showNotification(&#39;正在发布融合策略...&#39;, &#39;info&#39;);
+        setTimeout(() => {
+            showNotification(&#39;融合策略发布成功&#39;, &#39;success&#39;);
+        }, 2000);
+    };
+
+    // Utility function for notifications
+    function showNotification(message, type = &#39;info&#39;) {
+        // Create toast notification
+        const toast = document.createElement(&#39;div&#39;);
+        toast.className = `alert alert-${type} fixed top-4 right-4 w-auto max-w-sm z-50 shadow-lg`;
+        toast.innerHTML = `
+            <span class="iconify" data-icon="heroicons:${getIconForType(type)}" data-width="20"></span>
+            <span>${message}</span>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 3000);
+    }
+
+    function getIconForType(type) {
+        switch(type) {
+            case &#39;success&#39;: return &#39;check-circle&#39;;
+            case &#39;error&#39;: return &#39;x-circle&#39;;
+            case &#39;warning&#39;: return &#39;exclamation-triangle&#39;;
+            default: return &#39;information-circle&#39;;
+        }
+    }
+
+})();
+</script>
+
+<script>
+    setTimeout(() => {
+      Holder.run({
+        domain: "placehold.co"
+      })
+    }, 100)
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            

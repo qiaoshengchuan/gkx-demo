@@ -1,0 +1,1838 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <title>排行分析</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 1920
+                const height = 1080
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'login_page': '登录页',
+    'home_dashboard': '首页/仪表盘',
+    'resource_collection_overview': '资源采集总览',
+    'collection_task_management': '采集任务管理',
+    'create_edit_collection_task': '新建/编辑采集任务',
+    'collection_task_monitoring': '采集任务监控',
+    'information_source_management': '信息源管理',
+    'collection_node_management': '采集节点管理',
+    'data_cleaning_management': '数据清洗管理',
+    'data_quality_rule_config': '数据质量规则配置',
+    'auto_cleaning_task_config': '自动清洗任务配置',
+    'crowdsourcing_annotation_management': '群智标注任务管理',
+    'data_quality_cleaning_report': '数据质量/清洗评估报告',
+    'data_management_overview': '数据管理总览',
+    'data_fusion_config': '数据融合配置',
+    'source_db_table_management': '源数据库表管理',
+    'data_lifecycle_management': '数据生命周期管理',
+    'entity_data_management': '实体数据管理',
+    'data_processing_flow_config': '数据处理流程配置',
+    'data_entity_library_management': '数据实体库管理',
+    'api_service_management': 'API服务管理',
+    'data_service_monitoring': '数据服务监控',
+    'rule_discovery_overview': '规则发现总览',
+    'graph_extraction_task_management': '抽图任务管理',
+    'rule_discovery_task_config': '规则发现任务配置',
+    'rule_library_management': '规则库管理',
+    'create_edit_rule': '新建/编辑规则',
+    'rule_application_management': '规则应用任务管理',
+    'rule_application_monitoring': '规则应用监控',
+    'intelligence_mining_dashboard': '情报挖掘仪表盘',
+    'tech_intelligence_overview': '技术情报概览',
+    'development_trend_analysis': '发展态势与趋势分析',
+    'tech_hotspot_analysis': '技术热点分析',
+    'collaboration_analysis': '合作关系分析',
+    'ranking_analysis': '排行分析',
+    'academic_level_analysis': '学术水平分析',
+    'scholar_map': '学者地图',
+    'talent_mobility_analysis': '人才流动分析',
+    'auto_report_generation': '报告自动生成',
+    'scholar_profile_query': '学者画像查询',
+    'network_analysis': '网络分析',
+    'tech_panorama_analysis': '技术全景分析',
+    'expert_recommendation': '专家推荐',
+    'tech_traceability_analysis': '技术溯源分析',
+    'topic_mutation_analysis': '主题突变分析',
+    'dynamic_intelligence_recommendation': '动态情报推荐',
+    'thematic_intelligence_analysis': '专题情报分析',
+    'system_management': '系统管理',
+    'system_config': '系统配置',
+    'system_resource_monitoring': '系统资源监控',
+    'user_management': '用户管理',
+    'role_permission_management': '角色与权限管理',
+    'user_log_management': '用户日志管理',
+    'notification_center': '通知中心',
+    'data_import_export': '数据导入导出'
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = adjustIframeSize
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh-CN" data-theme="light"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行分析 - 科技情报智能挖掘系统</title>
+    <link href="./assets/static/uxbot/daisyui@5.css" rel="stylesheet" type="text/css">
+    <script src="./assets/static/uxbot/tailwind-browser@4.js"></script>
+    <link href="./assets/static/uxbot/daisyui-themes.css" rel="stylesheet" type="text/css">
+    <script src="./assets/3/3.1.1/iconify.min.js"></script>
+    <style>
+/* CSS code for common usage*/
+/* daisyUI Theme Variables Customization
+* Based on the selected daisyUI theme and UI guidance requirements,
+* customize only the CSS variables that need to be different from the theme defaults.
+* Available theme variables for customization:
+*/
+/* Only modify if different from chosen theme defaults */
+:root {
+  /* Customize brand colors for tech intelligence system */
+  --color-primary: rgba(37, 99, 235, 1); /* Deep blue #2563eb */
+  --color-primary-content: rgba(255, 255, 255, 1);
+  --color-secondary: rgba(99, 102, 241, 1); /* Indigo #6366f1 */
+  --color-secondary-content: rgba(255, 255, 255, 1);
+  --color-accent: rgba(147, 197, 253, 1); /* Light blue #93c5fd */
+  --color-accent-content: rgba(37, 99, 235, 1);
+  --color-base-100: rgba(255, 255, 255, 1); /* Pure white for cards */
+  --color-base-200: rgba(249, 250, 251, 1); /* Light gray for sections */
+  --color-base-300: rgba(229, 231, 235, 1);
+  --color-base-content: rgba(31, 41, 55, 1); /* Dark gray for text */
+  --color-success: rgba(34, 197, 94, 1); /* Green #22c55e */
+  --color-warning: rgba(251, 191, 36, 1); /* Amber #fbbf24 */
+  --color-error: rgba(239, 68, 68, 1); /* Red #ef4444 */
+  --color-info: rgba(59, 130, 246, 1); /* Blue #3b82f6 */
+  --radius-box: 0.5rem; /* 8px for Apple-like friendly feel */
+  --radius-field: 0.375rem; /* 6px for form elements */
+}
+
+/* Additional custom styles for common usage */
+.header-height {
+  height: 64px;
+}
+
+.sidebar-width {
+  width: 256px; /* 16rem */
+}
+
+.mega-menu-transition {
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+.breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+/* Sidebar navigation styles */
+.sidebar-nav-item {
+  transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--color-primary);
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* Content area spacing for dashboard layout */
+.main-content-area {
+  margin-left: 256px; /* 16rem - matches sidebar width */
+  min-height: calc(100vh - 64px); /* Full height minus header */
+}
+
+@media (max-width: 1024px) {
+  .main-content-area {
+    margin-left: 0;
+  }
+}
+
+/* Custom scrollbar for sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-base-300);
+  border-radius: 2px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base-content);
+  opacity: 0.5;
+}
+</style>
+    <style>
+/* Custom styles for ranking analysis page */
+.ranking-row {
+    transition: all 0.2s ease-in-out;
+}
+
+.ranking-row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.field-tag-transition {
+    transition: all 0.2s ease-in-out;
+}
+
+.chart-container {
+    background: linear-gradient(135deg, var(--color-base-100) 0%, var(--color-base-200) 100%);
+}
+
+.detail-sidebar-overlay {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+}
+
+/* Custom scrollbar for detail sidebar */
+#detailSidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+#detailSidebar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#detailSidebar::-webkit-scrollbar-thumb {
+    background: var(--color-base-300);
+    border-radius: 2px;
+}
+
+#detailSidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-base-content);
+    opacity: 0.5;
+}
+
+/* Smooth transitions for interactive elements */
+.btn, .select, .input, .dropdown {
+    transition: all 0.15s ease-in-out;
+}
+
+/* Enhanced card shadows */
+.shadow-sm {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Apple-style subtle animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* Skeleton loading for charts */
+.chart-skeleton {
+    background: linear-gradient(90deg, var(--color-base-200) 25%, var(--color-base-300) 50%, var(--color-base-200) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Enhanced dropdown styles */
+.dropdown-content {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--color-base-300);
+}
+
+/* Badge hover effects */
+.badge.cursor-pointer:hover {
+    transform: scale(1.05);
+}
+
+/* Table row selection effect */
+.table tbody tr.selected {
+    background-color: var(--color-primary);
+    background-color: rgba(37, 99, 235, 0.1) !important;
+    color: var(--color-primary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ranking-row:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-base-100 min-h-screen flex flex-col">
+    <!-- Header -->
+    <div data-section-id="common_header" data-section-type="common_header" class="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 header-height px-4 lg:px-8">
+  <!-- Mobile Menu Button &amp; Logo Section -->
+  <div class="navbar-start">
+    <button data-type="button" onclick="SidebarNavigation.toggleSidebar()" class="btn btn-ghost lg:hidden">
+      <span class="iconify" data-icon="heroicons:bars-3" data-width="24"></span>
+    </button>
+    
+    <button data-type="button" onclick="navigateTo(&#39;home_dashboard&#39;)" class="btn btn-ghost normal-case text-xl font-bold text-primary ml-2 lg:ml-0">
+      <span class="iconify" data-icon="heroicons:chart-bar-square" data-width="32"></span>
+      <span data-type="text">科技指数计算工具库</span>
+    </button>
+  </div>
+
+  <!-- Desktop Navigation - Hidden on mobile, sidebar takes over -->
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1 gap-2">
+      <li>
+        <button data-type="button" data-nav-item="home_dashboard" onclick="navigateTo(&#39;home_dashboard&#39;)" class="btn btn-ghost">
+          <span data-type="text">首页</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="resource_collection_overview" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">资源采集</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="data_management_overview" onclick="navigateTo(&#39;data_management_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">数据管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="rule_discovery_overview" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="btn btn-ghost">
+          <span data-type="text">规则发现</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-nav-item="intelligence_mining_dashboard" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="btn btn-ghost">
+          <span data-type="text">情报挖掘</span>
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="navbar-end gap-2">
+    <!-- Search Button -->
+    <button data-type="button" class="btn btn-ghost btn-circle">
+      <span class="iconify" data-icon="heroicons:magnifying-glass" data-width="20"></span>
+    </button>
+    
+    <!-- Notifications -->
+    <div data-type="container" class="dropdown dropdown-end">
+      <button data-type="button" class="btn btn-ghost btn-circle">
+        <div class="indicator">
+          <span class="iconify" data-icon="heroicons:bell" data-width="20"></span>
+          <span class="badge badge-xs badge-primary indicator-item"></span>
+        </div>
+      </button>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-80">
+        <li class="menu-title">
+          <span data-type="text">通知中心</span>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)">
+            <span class="iconify text-info" data-icon="heroicons:information-circle" data-width="16"></span>
+            <span data-type="text">数据采集任务完成</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)">
+            <span class="iconify text-warning" data-icon="heroicons:exclamation-triangle" data-width="16"></span>
+            <span data-type="text">系统资源使用率过高</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)" class="btn btn-ghost btn-sm">
+            <span data-type="text">查看全部通知</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- User Menu -->
+    <div data-type="container" class="dropdown dropdown-end">
+      <label tabindex="0" class="btn btn-ghost btn-circle">
+        <div class="avatar placeholder inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-content">
+          <span class="flex items-center justify-center h-full font-semibold text-sm">管</span>
+        </div>
+      </label>
+      <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+        <li class="menu-title">
+          <span data-type="text">管理员</span>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;user_management&#39;)">
+            <span class="iconify" data-icon="heroicons:user-circle" data-width="16"></span>
+            <span data-type="text">个人资料</span>
+          </button>
+        </li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="16"></span>
+            <span data-type="text">系统设置</span>
+          </button>
+        </li>
+        <li><div class="divider my-1"></div></li>
+        <li>
+          <button data-type="button" onclick="navigateTo(&#39;login_page&#39;)">
+            <span class="iconify" data-icon="heroicons:arrow-right-on-rectangle" data-width="16"></span>
+            <span data-type="text">退出登录</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+[data-section-id="common_header"] .navbar {
+  min-height: 64px;
+}
+
+[data-section-id="common_header"] .dropdown:hover .dropdown-content {
+  display: block;
+}
+
+[data-section-id="common_header"] .avatar.placeholder {
+  transition: all 0.2s ease-in-out;
+}
+
+[data-section-id="common_header"] .avatar.placeholder:hover {
+  transform: scale(1.05);
+}
+</style>
+
+<script>
+(function() {
+  // Initialize header on page load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Close dropdowns when clicking outside
+    document.addEventListener(&#39;click&#39;, function(e) {
+      const dropdowns = document.querySelectorAll(&#39;[data-section-id="common_header"] .dropdown&#39;);
+      dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(e.target)) {
+          const content = dropdown.querySelector(&#39;.dropdown-content&#39;);
+          if (content) {
+            content.classList.remove(&#39;dropdown-open&#39;);
+          }
+        }
+      });
+    });
+  });
+})();
+</script>
+    
+    <!-- Sidebar Overlay for Mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden" onclick="SidebarNavigation.closeSidebar()"></div>
+    
+    <!-- Sidebar -->
+    <div data-section-id="common_sidebar" data-section-type="common_sidebar" class="fixed inset-y-0 left-0 z-40 sidebar-width bg-base-100 border-r border-base-300 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" id="main-sidebar">
+  <!-- Sidebar Header -->
+  <div class="flex items-center justify-between p-4 border-b border-base-300">
+    <h2 data-type="text" class="text-lg font-semibold text-base-content">功能导航</h2>
+    <button data-type="button" onclick="SidebarNavigation.closeSidebar()" class="btn btn-ghost btn-sm btn-circle lg:hidden">
+      <span class="iconify" data-icon="heroicons:x-mark" data-width="16"></span>
+    </button>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <nav class="flex-1 overflow-y-auto sidebar-scroll p-4">
+    <ul class="menu menu-vertical w-full gap-1">
+      <!-- Dashboard -->
+      <li>
+        <button data-type="button" data-sidebar-nav="home_dashboard" onclick="navigateTo(&#39;home_dashboard&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:chart-pie" data-width="20"></span>
+          <span data-type="text">首页仪表盘</span>
+        </button>
+      </li>
+
+      <!-- Resource Collection Section -->
+      <li class="menu-title">
+        <span data-type="text">资源采集</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="resource_collection_overview" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:archive-box" data-width="20"></span>
+          <span data-type="text">资源采集总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="collection-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;collection-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="20"></span>
+            <span data-type="text">采集任务管理</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="collection-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="collection_task_management" onclick="navigateTo(&#39;collection_task_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:list-bullet" data-width="16"></span>
+              <span data-type="text">任务列表</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="create_edit_collection_task" onclick="navigateTo(&#39;create_edit_collection_task&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:plus-circle" data-width="16"></span>
+              <span data-type="text">新建任务</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="collection_task_monitoring" onclick="navigateTo(&#39;collection_task_monitoring&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:chart-bar" data-width="16"></span>
+              <span data-type="text">监控状态</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="information_source_management" onclick="navigateTo(&#39;information_source_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:server" data-width="20"></span>
+          <span data-type="text">信息源管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="collection_node_management" onclick="navigateTo(&#39;collection_node_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:cpu-chip" data-width="20"></span>
+          <span data-type="text">采集节点管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="cleaning-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;cleaning-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:sparkles" data-width="20"></span>
+            <span data-type="text">数据清洗</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="cleaning-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="data_cleaning_management" onclick="navigateTo(&#39;data_cleaning_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:adjustments-horizontal" data-width="16"></span>
+              <span data-type="text">清洗管理</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="data_quality_rule_config" onclick="navigateTo(&#39;data_quality_rule_config&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:shield-check" data-width="16"></span>
+              <span data-type="text">质量规则配置</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      <!-- Data Management Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">数据管理</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="data_management_overview" onclick="navigateTo(&#39;data_management_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:circle-stack" data-width="20"></span>
+          <span data-type="text">数据管理总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="entity_data_management" onclick="navigateTo(&#39;entity_data_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:squares-2x2" data-width="20"></span>
+          <span data-type="text">实体数据管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="api_service_management" onclick="navigateTo(&#39;api_service_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:code-bracket" data-width="20"></span>
+          <span data-type="text">API服务管理</span>
+        </button>
+      </li>
+
+      <!-- Rule Discovery Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">规则发现</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="rule_discovery_overview" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:light-bulb" data-width="20"></span>
+          <span data-type="text">规则发现总览</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="rule_library_management" onclick="navigateTo(&#39;rule_library_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:book-open" data-width="20"></span>
+          <span data-type="text">规则库管理</span>
+        </button>
+      </li>
+
+      <!-- Intelligence Mining Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">情报挖掘</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="intelligence_mining_dashboard" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:chart-bar-square" data-width="20"></span>
+          <span data-type="text">情报挖掘仪表盘</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-submenu-trigger="analysis-submenu" onclick="SidebarNavigation.toggleSubmenu(&#39;analysis-submenu&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg justify-between">
+          <div class="flex items-center gap-3">
+            <span class="iconify" data-icon="heroicons:magnifying-glass-circle" data-width="20"></span>
+            <span data-type="text">分析工具</span>
+          </div>
+          <span class="iconify submenu-arrow transition-transform duration-200" data-icon="heroicons:chevron-right" data-width="16"></span>
+        </button>
+        <ul id="analysis-submenu" class="hidden ml-6 mt-1 space-y-1">
+          <li>
+            <button data-type="button" data-sidebar-nav="tech_intelligence_overview" onclick="navigateTo(&#39;tech_intelligence_overview&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+              <span data-type="text">技术情报概览</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="scholar_profile_query" onclick="navigateTo(&#39;scholar_profile_query&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:user-group" data-width="16"></span>
+              <span data-type="text">学者画像查询</span>
+            </button>
+          </li>
+          <li>
+            <button data-type="button" data-sidebar-nav="network_analysis" onclick="navigateTo(&#39;network_analysis&#39;)" class="sidebar-nav-item flex items-center gap-3 p-2 rounded-lg text-sm">
+              <span class="iconify" data-icon="heroicons:share" data-width="16"></span>
+              <span data-type="text">网络分析</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+
+      <!-- System Management Section -->
+      <li class="menu-title mt-4">
+        <span data-type="text">系统管理</span>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="system_management" onclick="navigateTo(&#39;system_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:cog-8-tooth" data-width="20"></span>
+          <span data-type="text">系统管理</span>
+        </button>
+      </li>
+      <li>
+        <button data-type="button" data-sidebar-nav="user_management" onclick="navigateTo(&#39;user_management&#39;)" class="sidebar-nav-item flex items-center gap-3 p-3 rounded-lg">
+          <span class="iconify" data-icon="heroicons:users" data-width="20"></span>
+          <span data-type="text">用户管理</span>
+        </button>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebar-overlay" class="fixed inset-0 bg-base-content/50 z-30 lg:hidden hidden" onclick="SidebarNavigation.closeSidebar()"></div>
+
+<style>
+[data-section-id="common_sidebar"] {
+  top: 64px; /* Start below header */
+  height: calc(100vh - 64px); /* Full height minus header */
+}
+
+[data-section-id="common_sidebar"] .sidebar-nav-item {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 400;
+}
+
+[data-section-id="common_sidebar"] .menu-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-base-content);
+  opacity: 0.6;
+  margin: 1rem 0 0.5rem 0;
+  padding: 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+[data-section-id="common_sidebar"] .submenu-arrow {
+  transition: transform 0.2s ease-in-out;
+}
+
+@media (max-width: 1024px) {
+  [data-section-id="common_sidebar"] {
+    top: 0;
+    height: 100vh;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Initialize sidebar functionality
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Handle escape key to close sidebar on mobile
+    document.addEventListener(&#39;keydown&#39;, function(e) {
+      if (e.key === &#39;Escape&#39;) {
+        SidebarNavigation.closeSidebar();
+      }
+    });
+    
+    // Handle window resize
+    window.addEventListener(&#39;resize&#39;, function() {
+      if (window.innerWidth >= 1024) {
+        // Desktop: ensure sidebar is visible and overlay is hidden
+        const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+        const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+        
+        if (sidebar) sidebar.classList.remove(&#39;-translate-x-full&#39;);
+        if (overlay) overlay.classList.add(&#39;hidden&#39;);
+      }
+    });
+  });
+})();
+</script>
+    
+    <!-- Main Content Wrapper -->
+    <div class="flex-1 lg:ml-64">
+        <!-- Breadcrumb -->
+        <div data-section-id="common_breadcrumb" data-section-type="common_section" class="bg-base-200 py-4 px-4 lg:px-8">
+  <div data-type="container" class="max-w-full ml-0 lg:ml-64">
+    <div class="text-sm breadcrumbs">
+      <ul>
+        <li class="breadcrumb-separator">
+          <a data-type="text" href="#" onclick="navigateTo(&#39;home_dashboard&#39;)" class="flex items-center gap-1 text-primary hover:text-primary/80">
+            <span class="iconify" data-icon="heroicons:home-solid" data-width="16"></span>
+            <span>首页</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+[data-section-id="common_breadcrumb"] .breadcrumb-separator::after {
+  content: "›";
+  margin: 0 0.5rem;
+  color: var(--color-base-content);
+  opacity: 0.5;
+}
+
+[data-section-id="common_breadcrumb"] .breadcrumb-separator:last-child::after {
+  display: none;
+}
+
+[data-section-id="common_breadcrumb"] a {
+  transition: color 0.2s ease-in-out;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 1024px) {
+  [data-section-id="common_breadcrumb"] .max-w-full {
+    margin-left: 0;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Breadcrumb component is managed through the global BreadcrumbNavigation object
+  // Usage example:
+  // BreadcrumbNavigation.updateBreadcrumb([
+  //   { name: &#39;首页&#39;, pageId: &#39;home_dashboard&#39; },
+  //   { name: &#39;资源采集&#39;, pageId: &#39;resource_collection_overview&#39; },
+  //   { name: &#39;采集任务管理&#39;, pageId: &#39;collection_task_management&#39; }
+  // ]);
+})();
+</script>
+        
+        <!-- Main Content -->
+        <main class="px-4 lg:px-8 py-8 space-y-8">
+            <!-- Page Header Section -->
+            <section class="bg-base-100 rounded-lg p-8 shadow-sm border border-base-200">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-4">
+                        <button onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="btn btn-ghost btn-sm">
+                            <span class="iconify" data-icon="heroicons:arrow-left" data-width="20"></span>
+                            返回
+                        </button>
+                        <div class="divider divider-horizontal"></div>
+                        <div>
+                            <h1 class="text-3xl font-bold text-base-content mb-2">排行分析</h1>
+                            <p class="text-base-content/70 text-lg leading-relaxed">多维度的科研成果评价指标和排行分析功能，涵盖学术成果、刊会及机构表现。它帮助用户评估目标研究领域的学术水平和影响力，支持决策制定。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analysis Configuration Section -->
+            <section class="bg-base-100 rounded-lg p-8 shadow-sm border border-base-200">
+                <h2 class="text-2xl font-semibold text-base-content mb-6">分析配置</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Ranking Type Selection -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">排行榜类型</span>
+                        </label>
+                        <select class="select select-bordered" id="rankingType">
+                            <option disabled="" selected="">选择排行榜类型</option>
+                            <option value="scholars">学者排行</option>
+                            <option value="institutions">机构排行</option>
+                            <option value="journals">期刊排行</option>
+                            <option value="conferences">会议排行</option>
+                        </select>
+                    </div>
+
+                    <!-- Metric Selection -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">评价指标</span>
+                        </label>
+                        <select class="select select-bordered" id="metricType">
+                            <option disabled="" selected="">选择评价指标</option>
+                            <option value="h-index">H指数</option>
+                            <option value="citations">引用量</option>
+                            <option value="impact-factor">影响因子</option>
+                            <option value="publications">发表数量</option>
+                        </select>
+                    </div>
+
+                    <!-- Time Range Selection -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">时间范围</span>
+                        </label>
+                        <select class="select select-bordered" id="timeRange">
+                            <option disabled="" selected="">选择时间范围</option>
+                            <option value="2024">2024年</option>
+                            <option value="2023">2023年</option>
+                            <option value="2022-2024">2022-2024年</option>
+                            <option value="2020-2024">2020-2024年</option>
+                            <option value="all">全部时间</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Weight Configuration -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">权重配置</span>
+                        </label>
+                        <button class="btn btn-outline btn-primary" onclick="openWeightConfig()">
+                            <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="20"></span>
+                            自定义权重
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ranking Criteria Selection Section -->
+            <section class="bg-base-100 rounded-lg p-8 shadow-sm border border-base-200">
+                <h2 class="text-2xl font-semibold text-base-content mb-6">排行筛选</h2>
+                <div class="space-y-6">
+                    <!-- Field Categories -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">领域分类</span>
+                        </label>
+                        <div class="flex flex-wrap gap-2" id="fieldTags">
+                            <div class="badge badge-primary badge-lg cursor-pointer" data-field="ai" onclick="toggleFieldTag(this)">
+                                人工智能
+                                <span class="iconify ml-1" data-icon="heroicons:x-mark" data-width="16"></span>
+                            </div>
+                            <div class="badge badge-outline badge-lg cursor-pointer" data-field="biomedical" onclick="toggleFieldTag(this)">
+                                生物医学
+                            </div>
+                            <div class="badge badge-outline badge-lg cursor-pointer" data-field="materials" onclick="toggleFieldTag(this)">
+                                材料科学
+                            </div>
+                            <div class="badge badge-outline badge-lg cursor-pointer" data-field="physics" onclick="toggleFieldTag(this)">
+                                物理学
+                            </div>
+                            <button class="btn btn-ghost btn-sm" onclick="showMoreFields()">
+                                <span class="iconify" data-icon="heroicons:plus" data-width="16"></span>
+                                更多领域
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Country/Region and Institution Type -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">国家/地区</span>
+                            </label>
+                            <div class="dropdown w-full">
+                                <button tabindex="0" role="button" class="btn w-full justify-between" id="countrySelector">
+                                    <span>选择国家/地区</span>
+                                    <span class="iconify" data-icon="heroicons:chevron-down" data-width="20"></span>
+                                </button>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full mt-2">
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">中国</span><input type="checkbox" value="China" class="checkbox checkbox-primary"></label></li>
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">美国</span><input type="checkbox" value="USA" class="checkbox checkbox-primary"></label></li>
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">英国</span><input type="checkbox" value="UK" class="checkbox checkbox-primary"></label></li>
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">德国</span><input type="checkbox" value="Germany" class="checkbox checkbox-primary"></label></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-medium">机构类型</span>
+                            </label>
+                            <div class="dropdown w-full">
+                                <button tabindex="0" role="button" class="btn w-full justify-between" id="institutionSelector">
+                                    <span>选择机构类型</span>
+                                    <span class="iconify" data-icon="heroicons:chevron-down" data-width="20"></span>
+                                </button>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full mt-2">
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">大学</span><input type="checkbox" value="University" class="checkbox checkbox-primary"></label></li>
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">研究机构</span><input type="checkbox" value="Research" class="checkbox checkbox-primary"></label></li>
+                                    <li><label class="label cursor-pointer py-2 justify-between"><span class="label-text">企业研发</span><input type="checkbox" value="Corporate" class="checkbox checkbox-primary"></label></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sorting Options -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">排序方式</span>
+                        </label>
+                        <div class="flex flex-wrap gap-4">
+                            <label class="label cursor-pointer gap-2">
+                                <input type="radio" name="sortOrder" value="h-index-desc" class="radio radio-primary" checked="">
+                                <span class="label-text">按H指数降序</span>
+                            </label>
+                            <label class="label cursor-pointer gap-2">
+                                <input type="radio" name="sortOrder" value="citations-desc" class="radio radio-primary">
+                                <span class="label-text">按引用量降序</span>
+                            </label>
+                            <label class="label cursor-pointer gap-2">
+                                <input type="radio" name="sortOrder" value="publications-desc" class="radio radio-primary">
+                                <span class="label-text">按发表数量降序</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leaderboard and Visualizations Section -->
+            <section class="bg-base-100 rounded-lg p-8 shadow-sm border border-base-200">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-semibold text-base-content">学者H指数排行榜</h2>
+                    <div class="flex items-center gap-4">
+                        <div class="tabs tabs-boxed">
+                            <button class="tab tab-active" onclick="switchView(&#39;table&#39;)">表格视图</button>
+                            <button class="tab" onclick="switchView(&#39;chart&#39;)">图表视图</button>
+                        </div>
+                        <button class="btn btn-outline btn-sm" onclick="exportRanking()">
+                            <span class="iconify" data-icon="heroicons:arrow-down-tray" data-width="16"></span>
+                            导出
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table View -->
+                <div id="tableView" class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th class="cursor-pointer hover:bg-base-200" onclick="sortTable(&#39;rank&#39;)">
+                                    <div class="flex items-center gap-2">
+                                        <span>排名</span>
+                                        <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                    </div>
+                                </th>
+                                <th class="cursor-pointer hover:bg-base-200" onclick="sortTable(&#39;name&#39;)">
+                                    <div class="flex items-center gap-2">
+                                        <span>学者姓名</span>
+                                        <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                    </div>
+                                </th>
+                                <th class="cursor-pointer hover:bg-base-200" onclick="sortTable(&#39;institution&#39;)">
+                                    <div class="flex items-center gap-2">
+                                        <span>所属机构</span>
+                                        <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                    </div>
+                                </th>
+                                <th class="cursor-pointer hover:bg-base-200" onclick="sortTable(&#39;hindex&#39;)">
+                                    <div class="flex items-center gap-2">
+                                        <span>H指数</span>
+                                        <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                    </div>
+                                </th>
+                                <th class="cursor-pointer hover:bg-base-200" onclick="sortTable(&#39;citations&#39;)">
+                                    <div class="flex items-center gap-2">
+                                        <span>总引用量</span>
+                                        <span class="iconify" data-icon="heroicons:arrows-up-down" data-width="16"></span>
+                                    </div>
+                                </th>
+                                <th>趋势</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody data-repeatable="true">
+                            <tr class="hover:bg-base-200 cursor-pointer ranking-row" data-type="ranking-item" data-repeatable="true" onclick="showScholarDetails(&#39;scholar1&#39;)">
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <div class="badge badge-warning badge-lg">1</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-primary text-primary-content flex items-center justify-center text-sm font-bold">
+                                            张三
+                                        </div>
+                                        <div>
+                                            <div class="font-bold">张三</div>
+                                            <div class="text-sm opacity-50">人工智能</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>清华大学</div>
+                                    <div class="text-sm opacity-50">计算机科学与技术系</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-lg">156</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-lg">23,456</div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        <span class="iconify text-success" data-icon="heroicons:arrow-trending-up" data-width="20"></span>
+                                        <span class="text-success text-sm">+12%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation(); viewProfile(&#39;scholar1&#39;)">
+                                        <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-base-200 cursor-pointer ranking-row" data-type="ranking-item" data-repeatable="true" onclick="showScholarDetails(&#39;scholar2&#39;)">
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <div class="badge badge-info badge-lg">2</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-sm font-bold">
+                                            李四
+                                        </div>
+                                        <div>
+                                            <div class="font-bold">李四</div>
+                                            <div class="text-sm opacity-50">机器学习</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>北京大学</div>
+                                    <div class="text-sm opacity-50">信息科学技术学院</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-lg">142</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-lg">19,832</div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        <span class="iconify text-success" data-icon="heroicons:arrow-trending-up" data-width="20"></span>
+                                        <span class="text-success text-sm">+8%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation(); viewProfile(&#39;scholar2&#39;)">
+                                        <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-base-200 cursor-pointer ranking-row" data-type="ranking-item" data-repeatable="true" onclick="showScholarDetails(&#39;scholar3&#39;)">
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <div class="badge badge-accent badge-lg">3</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-accent text-accent-content flex items-center justify-center text-sm font-bold">
+                                            王五
+                                        </div>
+                                        <div>
+                                            <div class="font-bold">王五</div>
+                                            <div class="text-sm opacity-50">深度学习</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>中科院计算所</div>
+                                    <div class="text-sm opacity-50">智能信息处理重点实验室</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-lg">138</div>
+                                </td>
+                                <td>
+                                    <div class="font-bold text-lg">18,765</div>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        <span class="iconify text-error" data-icon="heroicons:arrow-trending-down" data-width="20"></span>
+                                        <span class="text-error text-sm">-2%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation(); viewProfile(&#39;scholar3&#39;)">
+                                        <span class="iconify" data-icon="heroicons:eye" data-width="16"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Chart View (Hidden by default) -->
+                <div id="chartView" class="hidden">
+                    <div class="flex justify-center mb-6">
+                        <div class="tabs tabs-boxed">
+                            <button class="tab tab-active" onclick="switchChart(&#39;bar&#39;)">柱状图</button>
+                            <button class="tab" onclick="switchChart(&#39;line&#39;)">折线图</button>
+                            <button class="tab" onclick="switchChart(&#39;scatter&#39;)">散点图</button>
+                        </div>
+                    </div>
+                    <div class="bg-base-200 rounded-lg p-8 min-h-96 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span class="iconify text-primary" data-icon="heroicons:chart-bar" data-width="32"></span>
+                            </div>
+                            <p class="text-base-content/70">图表视图正在加载中...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="flex justify-between items-center mt-6">
+                    <div class="text-sm text-base-content/70">
+                        显示第 1-10 条，共 156 条记录
+                    </div>
+                    <div class="join">
+                        <button class="join-item btn btn-sm" disabled="">«</button>
+                        <button class="join-item btn btn-sm btn-active">1</button>
+                        <button class="join-item btn btn-sm">2</button>
+                        <button class="join-item btn btn-sm">3</button>
+                        <button class="join-item btn btn-sm">...</button>
+                        <button class="join-item btn btn-sm">16</button>
+                        <button class="join-item btn btn-sm">»</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <div data-section-id="common_footer" data-section-type="common_footer" class="bg-base-200 text-base-content mt-auto">
+  <!-- Main Footer Content -->
+  <footer class="footer footer-center p-10 max-w-full ml-0 lg:ml-64">
+    <!-- System Info -->
+    <aside class="flex flex-col items-center">
+      <div data-type="container" class="flex items-center gap-3 mb-4">
+        <span class="iconify text-primary" data-icon="heroicons:chart-bar-square" data-width="32"></span>
+        <h3 data-type="text" class="text-xl font-bold text-primary">科技指数计算工具库</h3>
+      </div>
+      <div data-type="container" class="text-sm space-y-2 text-center max-w-2xl">
+        <p data-type="text" class="text-base-content/80">
+          基于多源科技信息采集与智能分析，为技术链深度解析、产业竞争格局分析、科技创新趋势提供数据情报支撑
+        </p>
+        <p data-type="text" class="flex items-center gap-1 justify-center">
+          <span class="iconify" data-icon="heroicons:shield-check" data-width="16"></span>
+          数据安全 · 智能分析 · 精准情报
+        </p>
+      </div>
+    </aside>
+
+    <!-- Quick Links -->
+    <nav class="grid grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-4xl">
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">资源采集</header>
+        <button data-type="button" onclick="navigateTo(&#39;resource_collection_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">采集总览</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;collection_task_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">任务管理</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;data_cleaning_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">数据清洗</span>
+        </button>
+      </div>
+      
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">数据管理</header>
+        <button data-type="button" onclick="navigateTo(&#39;data_management_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">管理总览</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;entity_data_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">实体数据</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;api_service_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">API服务</span>
+        </button>
+      </div>
+      
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">规则发现</header>
+        <button data-type="button" onclick="navigateTo(&#39;rule_discovery_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">发现总览</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;rule_library_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">规则库管理</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;graph_extraction_task_management&#39;)" class="link link-hover block text-left">
+          <span data-type="text">抽图任务</span>
+        </button>
+      </div>
+      
+      <div>
+        <header data-type="text" class="footer-title text-primary mb-3">情报挖掘</header>
+        <button data-type="button" onclick="navigateTo(&#39;intelligence_mining_dashboard&#39;)" class="link link-hover block text-left">
+          <span data-type="text">挖掘仪表盘</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;tech_intelligence_overview&#39;)" class="link link-hover block text-left">
+          <span data-type="text">技术情报</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;scholar_profile_query&#39;)" class="link link-hover block text-left">
+          <span data-type="text">学者画像</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- System Links -->
+    <nav class="flex flex-wrap justify-center gap-6">
+      <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:cog-6-tooth" data-width="16"></span>
+        <span data-type="text">系统设置</span>
+      </button>
+      <button data-type="button" onclick="navigateTo(&#39;user_management&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:users" data-width="16"></span>
+        <span data-type="text">用户管理</span>
+      </button>
+      <button data-type="button" onclick="navigateTo(&#39;notification_center&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:bell" data-width="16"></span>
+        <span data-type="text">通知中心</span>
+      </button>
+      <button data-type="button" onclick="navigateTo(&#39;data_import_export&#39;)" class="link link-hover flex items-center gap-1">
+        <span class="iconify" data-icon="heroicons:arrow-down-tray" data-width="16"></span>
+        <span data-type="text">数据导入导出</span>
+      </button>
+    </nav>
+  </footer>
+
+  <!-- Bottom Footer Bar -->
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content border-t border-base-content/10">
+    <aside class="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 max-w-full ml-0 lg:ml-64 w-full justify-center">
+      <p data-type="text" class="text-sm">© 2025 科技指数计算工具库. All rights reserved.</p>
+      <div data-type="container" class="flex gap-4 text-sm">
+        <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover">
+          <span data-type="text">使用条款</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover">
+          <span data-type="text">隐私政策</span>
+        </button>
+        <button data-type="button" onclick="navigateTo(&#39;system_management&#39;)" class="link link-hover">
+          <span data-type="text">技术支持</span>
+        </button>
+      </div>
+    </aside>
+  </footer>
+</div>
+
+<style>
+[data-section-id="common_footer"] .footer-title {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+[data-section-id="common_footer"] .link-hover {
+  transition: color 0.2s ease-in-out;
+  font-size: 0.875rem;
+}
+
+[data-section-id="common_footer"] .link-hover:hover {
+  color: var(--color-primary);
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 1024px) {
+  [data-section-id="common_footer"] footer {
+    margin-left: 0;
+  }
+  
+  [data-section-id="common_footer"] aside {
+    margin-left: 0;
+  }
+}
+</style>
+
+<script>
+(function() {
+  // Footer component functionality
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    // Add smooth hover effects for footer links
+    const footerLinks = document.querySelectorAll(&#39;[data-section-id="common_footer"] .link-hover&#39;);
+    footerLinks.forEach(link => {
+      link.addEventListener(&#39;mouseenter&#39;, function() {
+        this.style.transform = &#39;translateX(2px)&#39;;
+      });
+      
+      link.addEventListener(&#39;mouseleave&#39;, function() {
+        this.style.transform = &#39;translateX(0)&#39;;
+      });
+    });
+  });
+})();
+</script>
+
+    <!-- Detail Sidebar (Hidden by default) -->
+    <div id="detailSidebar" class="fixed inset-y-0 right-0 w-96 bg-base-100 border-l border-base-200 transform translate-x-full transition-transform duration-300 ease-in-out z-50 shadow-xl">
+        <div class="p-6 border-b border-base-200">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold">学者详情</h3>
+                <button class="btn btn-ghost btn-sm btn-circle" onclick="closeDetailSidebar()">
+                    <span class="iconify" data-icon="heroicons:x-mark" data-width="20"></span>
+                </button>
+            </div>
+        </div>
+        <div class="p-6 overflow-y-auto h-full">
+            <div id="sidebarContent">
+                <!-- Dynamic content will be loaded here -->
+                <div class="text-center py-8">
+                    <div class="loading loading-spinner loading-lg text-primary"></div>
+                    <p class="mt-4 text-base-content/70">加载中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+/* JavaScript code for common usage, should be wrapped in a closure */
+(function() {
+  // Initialize global namespace
+  window.APP_GLOBALS = window.APP_GLOBALS || {};
+
+  // Navigation function for page transitions
+  window.navigateTo = function(targetPageId) {
+    const isInIframe = window.self !== window.top;
+    const targetFileName = `${targetPageId}.html`;
+    
+    if (isInIframe) {
+      window.parent.postMessage({
+        type: &#39;iframeNavigation&#39;,
+        targetPageId: targetPageId
+      }, &#39;*&#39;);
+    } else {
+      window.location.href = targetFileName;
+    }
+  };
+
+  // Header navigation state management
+  window.HeaderNavigation = {
+    setActiveNavItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-nav-item]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-nav-item&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleMobileMenu: function() {
+      const mobileMenu = document.getElementById(&#39;mobile-nav-menu&#39;);
+      const hamburger = document.getElementById(&#39;hamburger-icon&#39;);
+      const closeIcon = document.getElementById(&#39;close-icon&#39;);
+      
+      if (mobileMenu.classList.contains(&#39;hidden&#39;)) {
+        mobileMenu.classList.remove(&#39;hidden&#39;);
+        hamburger.classList.add(&#39;hidden&#39;);
+        closeIcon.classList.remove(&#39;hidden&#39;);
+      } else {
+        mobileMenu.classList.add(&#39;hidden&#39;);
+        hamburger.classList.remove(&#39;hidden&#39;);
+        closeIcon.classList.add(&#39;hidden&#39;);
+      }
+    }
+  };
+
+  // Sidebar navigation management
+  window.SidebarNavigation = {
+    setActiveMenuItem: function(activePageId) {
+      const navItems = document.querySelectorAll(&#39;[data-sidebar-nav]&#39;);
+      navItems.forEach(item => {
+        const pageId = item.getAttribute(&#39;data-sidebar-nav&#39;);
+        if (pageId === activePageId) {
+          item.classList.add(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        } else {
+          item.classList.remove(&#39;active&#39;, &#39;bg-primary/10&#39;, &#39;text-primary&#39;);
+        }
+      });
+    },
+
+    toggleSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        const isHidden = sidebar.classList.contains(&#39;-translate-x-full&#39;);
+        
+        if (isHidden) {
+          sidebar.classList.remove(&#39;-translate-x-full&#39;);
+          overlay.classList.remove(&#39;hidden&#39;);
+        } else {
+          sidebar.classList.add(&#39;-translate-x-full&#39;);
+          overlay.classList.add(&#39;hidden&#39;);
+        }
+      }
+    },
+
+    closeSidebar: function() {
+      const sidebar = document.getElementById(&#39;main-sidebar&#39;);
+      const overlay = document.getElementById(&#39;sidebar-overlay&#39;);
+      
+      if (sidebar &amp;&amp; overlay) {
+        sidebar.classList.add(&#39;-translate-x-full&#39;);
+        overlay.classList.add(&#39;hidden&#39;);
+      }
+    },
+
+    toggleSubmenu: function(submenuId) {
+      const submenu = document.getElementById(submenuId);
+      const arrow = document.querySelector(`[data-submenu-trigger="${submenuId}"] .submenu-arrow`);
+      
+      if (submenu) {
+        const isHidden = submenu.classList.contains(&#39;hidden&#39;);
+        
+        if (isHidden) {
+          submenu.classList.remove(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(90deg)&#39;;
+        } else {
+          submenu.classList.add(&#39;hidden&#39;);
+          if (arrow) arrow.style.transform = &#39;rotate(0deg)&#39;;
+        }
+      }
+    }
+  };
+
+  // Breadcrumb navigation management
+  window.BreadcrumbNavigation = {
+    updateBreadcrumb: function(breadcrumbData) {
+      const breadcrumbContainer = document.querySelector(&#39;[data-section-id="common_breadcrumb"] .breadcrumbs ul&#39;);
+      if (!breadcrumbContainer) return;
+
+      breadcrumbContainer.innerHTML = &#39;&#39;;
+      breadcrumbData.forEach((item, index) => {
+        const li = document.createElement(&#39;li&#39;);
+        li.className = &#39;breadcrumb-separator&#39;;
+        
+        if (index === breadcrumbData.length - 1) {
+          // Last item (current page) - not clickable
+          li.innerHTML = `<span data-type="text" class="text-base-content/70">${item.name}</span>`;
+        } else {
+          // Clickable items
+          li.innerHTML = `<a data-type="text" href="#" onclick="navigateTo(&#39;${item.pageId}&#39;)" class="text-primary hover:text-primary/80">${item.name}</a>`;
+        }
+        breadcrumbContainer.appendChild(li);
+      });
+    }
+  };
+
+  // Theme management
+  window.ThemeManager = {
+    setTheme: function(themeName) {
+      document.documentElement.setAttribute(&#39;data-theme&#39;, themeName);
+      localStorage.setItem(&#39;app-theme&#39;, themeName);
+    },
+
+    getTheme: function() {
+      return localStorage.getItem(&#39;app-theme&#39;) || &#39;light&#39;;
+    },
+
+    initTheme: function() {
+      const savedTheme = this.getTheme();
+      this.setTheme(savedTheme);
+    }
+  };
+
+  // Initialize theme on load
+  document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    window.ThemeManager.initTheme();
+  });
+
+})();
+</script>
+    <script>
+(function() {
+    // Initialize page on load
+    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+        // Set active navigation items
+        if (window.HeaderNavigation) {
+            window.HeaderNavigation.setActiveNavItem(&#39;intelligence_mining_dashboard&#39;);
+        }
+        if (window.SidebarNavigation) {
+            window.SidebarNavigation.setActiveMenuItem(&#39;ranking_analysis&#39;);
+        }
+        if (window.BreadcrumbNavigation) {
+            window.BreadcrumbNavigation.updateBreadcrumb([
+                { name: &#39;情报挖掘&#39;, pageId: &#39;intelligence_mining_dashboard&#39; },
+                { name: &#39;排行分析&#39;, pageId: &#39;ranking_analysis&#39; }
+            ]);
+        }
+
+        // Initialize multiselect dropdowns
+        initializeMultiselect();
+        
+        // Initialize field tags
+        initializeFieldTags();
+    });
+
+    // Field tag management
+    window.toggleFieldTag = function(element) {
+        if (element.classList.contains(&#39;badge-outline&#39;)) {
+            element.classList.remove(&#39;badge-outline&#39;);
+            element.classList.add(&#39;badge-primary&#39;);
+            element.innerHTML += &#39;<span class="iconify ml-1" data-icon="heroicons:x-mark" data-width="16"></span>&#39;;
+        } else {
+            element.classList.add(&#39;badge-outline&#39;);
+            element.classList.remove(&#39;badge-primary&#39;);
+            const closeIcon = element.querySelector(&#39;.iconify&#39;);
+            if (closeIcon) {
+                closeIcon.remove();
+            }
+        }
+    };
+
+    window.showMoreFields = function() {
+        // Stub function for showing more field options
+        console.log(&#39;Show more fields dialog&#39;);
+    };
+
+    // View switching
+    window.switchView = function(viewType) {
+        const tableView = document.getElementById(&#39;tableView&#39;);
+        const chartView = document.getElementById(&#39;chartView&#39;);
+        const tabs = document.querySelectorAll(&#39;.tabs .tab&#39;);
+        
+        tabs.forEach(tab => tab.classList.remove(&#39;tab-active&#39;));
+        event.target.classList.add(&#39;tab-active&#39;);
+        
+        if (viewType === &#39;table&#39;) {
+            tableView.classList.remove(&#39;hidden&#39;);
+            chartView.classList.add(&#39;hidden&#39;);
+        } else {
+            tableView.classList.add(&#39;hidden&#39;);
+            chartView.classList.remove(&#39;hidden&#39;);
+        }
+    };
+
+    // Chart switching
+    window.switchChart = function(chartType) {
+        const tabs = document.querySelectorAll(&#39;#chartView .tabs .tab&#39;);
+        tabs.forEach(tab => tab.classList.remove(&#39;tab-active&#39;));
+        event.target.classList.add(&#39;tab-active&#39;);
+        
+        // Simulate chart loading
+        const chartContainer = document.querySelector(&#39;#chartView .bg-base-200&#39;);
+        chartContainer.innerHTML = `
+            <div class="text-center">
+                <div class="loading loading-spinner loading-lg text-primary"></div>
+                <p class="mt-4 text-base-content/70">正在加载${getChartTypeName(chartType)}...</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            chartContainer.innerHTML = `
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="iconify text-primary" data-icon="heroicons:chart-${chartType === &#39;bar&#39; ? &#39;bar&#39; : chartType === &#39;line&#39; ? &#39;line&#39; : &#39;scatter&#39;}" data-width="32"></span>
+                    </div>
+                    <p class="text-base-content/70">${getChartTypeName(chartType)}视图</p>
+                </div>
+            `;
+        }, 1000);
+    };
+
+    function getChartTypeName(type) {
+        const names = {
+            &#39;bar&#39;: &#39;柱状图&#39;,
+            &#39;line&#39;: &#39;折线图&#39;,
+            &#39;scatter&#39;: &#39;散点图&#39;
+        };
+        return names[type] || &#39;图表&#39;;
+    }
+
+    // Table sorting
+    window.sortTable = function(column) {
+        console.log(&#39;Sort table by:&#39;, column);
+        // Stub function for table sorting
+    };
+
+    // Scholar details
+    window.showScholarDetails = function(scholarId) {
+        const sidebar = document.getElementById(&#39;detailSidebar&#39;);
+        const content = document.getElementById(&#39;sidebarContent&#39;);
+        
+        // Show sidebar
+        sidebar.classList.remove(&#39;translate-x-full&#39;);
+        
+        // Load scholar details (simulated)
+        content.innerHTML = `
+            <div class="text-center py-8">
+                <div class="loading loading-spinner loading-lg text-primary"></div>
+                <p class="mt-4 text-base-content/70">加载学者详情...</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="text-center">
+                        <div class="w-24 h-24 rounded-full bg-primary text-primary-content flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                            张三
+                        </div>
+                        <h4 class="text-xl font-semibold">张三</h4>
+                        <p class="text-base-content/70">清华大学 · 人工智能</p>
+                    </div>
+                    
+                    <div class="stats stats-vertical shadow">
+                        <div class="stat">
+                            <div class="stat-title">H指数</div>
+                            <div class="stat-value text-primary">156</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">总引用量</div>
+                            <div class="stat-value text-secondary">23,456</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-title">发表论文</div>
+                            <div class="stat-value text-accent">342</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 class="font-semibold mb-3">研究领域</h5>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="badge badge-primary">机器学习</div>
+                            <div class="badge badge-secondary">深度学习</div>
+                            <div class="badge badge-accent">计算机视觉</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 class="font-semibold mb-3">近期论文</h5>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-base-200 rounded-lg">
+                                <h6 class="font-medium text-sm">Deep Learning for Computer Vision</h6>
+                                <p class="text-xs text-base-content/70 mt-1">Nature Machine Intelligence, 2024</p>
+                            </div>
+                            <div class="p-3 bg-base-200 rounded-lg">
+                                <h6 class="font-medium text-sm">Advances in Neural Networks</h6>
+                                <p class="text-xs text-base-content/70 mt-1">Science, 2023</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }, 800);
+    };
+
+    window.closeDetailSidebar = function() {
+        const sidebar = document.getElementById(&#39;detailSidebar&#39;);
+        sidebar.classList.add(&#39;translate-x-full&#39;);
+    };
+
+    // Profile viewing
+    window.viewProfile = function(scholarId) {
+        console.log(&#39;View profile for:&#39;, scholarId);
+        // Stub function for viewing full profile
+    };
+
+    // Export functionality
+    window.exportRanking = function() {
+        console.log(&#39;Export ranking data&#39;);
+        // Stub function for exporting data
+    };
+
+    // Weight configuration
+    window.openWeightConfig = function() {
+        console.log(&#39;Open weight configuration dialog&#39;);
+        // Stub function for weight configuration
+    };
+
+    // Initialize multiselect functionality
+    function initializeMultiselect() {
+        const dropdowns = document.querySelectorAll(&#39;.dropdown&#39;);
+        dropdowns.forEach(dropdown => {
+            const button = dropdown.querySelector(&#39;button&#39;);
+            const menu = dropdown.querySelector(&#39;ul&#39;);
+            const checkboxes = dropdown.querySelectorAll(&#39;input[type="checkbox"]&#39;);
+            
+            if (!button || !menu || !checkboxes.length) return;
+            
+            const defaultText = button.querySelector(&#39;span&#39;).textContent;
+            
+            // Prevent menu from closing when clicking inside
+            menu.addEventListener(&#39;click&#39;, (e) => {
+                e.stopPropagation();
+            });
+            
+            // Update button text based on selections
+            function updateButtonText() {
+                const selected = Array.from(checkboxes).filter(cb => cb.checked);
+                if (selected.length === 0) {
+                    button.querySelector(&#39;span&#39;).textContent = defaultText;
+                } else {
+                    button.querySelector(&#39;span&#39;).textContent = `已选择 ${selected.length} 项`;
+                }
+            }
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener(&#39;change&#39;, updateButtonText);
+            });
+        });
+    }
+
+    // Initialize field tags
+    function initializeFieldTags() {
+        const tags = document.querySelectorAll(&#39;#fieldTags .badge&#39;);
+        tags.forEach(tag => {
+            tag.classList.add(&#39;field-tag-transition&#39;);
+        });
+    }
+
+    // Close detail sidebar when clicking outside
+    document.addEventListener(&#39;click&#39;, function(e) {
+        const sidebar = document.getElementById(&#39;detailSidebar&#39;);
+        if (sidebar &amp;&amp; !sidebar.contains(e.target) &amp;&amp; !sidebar.classList.contains(&#39;translate-x-full&#39;)) {
+            const clickedRow = e.target.closest(&#39;.ranking-row&#39;);
+            if (!clickedRow) {
+                closeDetailSidebar();
+            }
+        }
+    });
+
+})();
+</script>
+
+<script>
+    setTimeout(() => {
+      Holder.run({
+        domain: "placehold.co"
+      })
+    }, 100)
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            
